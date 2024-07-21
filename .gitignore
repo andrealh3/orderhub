@@ -1,0 +1,30 @@
+database/
+
+# Python
+env/
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.env
+.vscode/
+.idea/
+
+# React
+node_modules/
+build/
+dist/
+*.log
+.env
+.vscode/
+.idea/
+.eslintcache
+
+# OS specific
+.DS_Store
+Thumbs.db
+.coverage
+coverage/
+*.coverage

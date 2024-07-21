@@ -1,0 +1,66 @@
+services:
+  backend:
+    depends_on:
+      db:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: ./docker/backend/desarrollo/Dockerfile
+    container_name: ${APP_NAME}_backend
+    volumes:
+      - ./backend/:/usr/src/app/backend/
+    ports:
+      - "8000:8000"
+    networks:
+      - network
+    restart: always
+    environment:
+      POSTGRES_DB: ${DATABASE_NOMBRE}
+      POSTGRES_USER: ${DATABASE_USUARIO}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD_USUARIO}
+      DB_HOST: db
+      DB_PORT: 5432
+    
+  frontend:
+    depends_on:
+      db:
+        condition: service_healthy
+    build:
+      context: .
+      dockerfile: ./docker/frontend/desarrollo/Dockerfile
+    container_name: ${APP_NAME}_frontend
+    ports:
+      - "3000:5173"
+    networks:
+      - network
+    volumes:
+      - ./frontend/:/usr/src/app/frontend/
+
+  db:
+    container_name: ${APP_NAME}_db
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DATABASE_USUARIO}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD_USUARIO}
+      POSTGRES_DB: ${DATABASE_NOMBRE}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "$DATABASE_USUARIO", "-d", "$DATABASE_NOMBRE"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - network
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
+  
+networks:
+  network:
+    name: ${APP_NAME}_network
+    driver: bridge
+  

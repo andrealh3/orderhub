@@ -1,0 +1,33 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker/backend/produccion/Dockerfile
+    container_name: ${APP_NAME}_backend
+    ports:
+      - "8000:8000"
+    networks:
+      - network
+    restart: always
+    environment:
+      POSTGRES_DB: ${DATABASE_NOMBRE}
+      POSTGRES_USER: ${DATABASE_USUARIO}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD_USUARIO}
+      DB_HOST: ${DB_HOST_EXTERNAL}
+      DB_PORT: ${DB_PORT_EXTERNAL}
+    
+  frontend:
+    build:
+      context: .
+      dockerfile: ./docker/frontend/produccion/Dockerfile
+    container_name: ${APP_NAME}_frontend
+    ports:
+      - "80:80"
+    networks:
+      - network
+  
+networks:
+  network:
+    name: ${APP_NAME}_network
+    driver: bridge
+  

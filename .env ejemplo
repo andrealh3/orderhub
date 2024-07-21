@@ -1,0 +1,7 @@
+# Configuración del nombre del proyecto
+APP_NAME=nombre_proyecto
+
+# Configuración de la base de datos
+DATABASE_NOMBRE=nombre_basededatos
+DATABASE_USUARIO=usuario_basededatos
+DATABASE_PASSWORD_USUARIO=contraseña_usuario_basededatos
