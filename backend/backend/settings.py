@@ -27,19 +27,19 @@ SECRET_KEY = 'django-insecure-z06ro_+zae$q5a%_09q@80n@!z4t&865_d=28a!@hdln4ys40+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["orderhub-backend-xwva.onrender.com"]
+ALLOWED_HOSTS = ["localhost", "orderhub-backend-xwva.onrender.com"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'orderhub',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'orderhub',
 ]
 
 MIDDLEWARE = [
@@ -130,3 +130,5 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'orderhub.User'

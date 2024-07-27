@@ -4,10 +4,10 @@ arrancar:
 	cd "$$PROJECT_DIR" && \
 	yarn > /dev/null 2>&1 && \
 	cd -
-	docker compose -f compose.produccion.yml up -d --build
+	docker compose -f compose.desarrollo.yml up -d --build
   
 bajar:
-	docker compose -f compose.produccion.yml down
+	docker compose -f compose.desarrollo.yml down
 
 migrarbd:
 	docker exec -it ${APP_NAME}_backend python manage.py makemigrations
