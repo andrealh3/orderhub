@@ -1,12 +1,48 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        """Crea y devuelve un usuario con un email y una contraseña"""
+        if not email:
+            raise ValueError('El campo Email debe estar establecido')
+        email = self.normalize_email(email)
+        
+        # Asigna el rol solo si no está ya en extra_fields
+        if 'role' not in extra_fields:
+            extra_fields['role'] = 'cliente'  # Asigna el rol 'clientes' por defecto
+        
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        """Crea y devuelve un superusuario con un email y una contraseña"""
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('El superusuario debe tener is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('El superusuario debe tener is_superuser=True.')
+
+        # Asegúrate de que el rol se establezca solo si no está presente
+        extra_fields.setdefault('role', 'admin')  # Establece el rol 'admin' para superusuarios
+        
+        return self.create_user(email, password, **extra_fields)
+    
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    token = models.UUIDField(editable=False, null=True, blank=True)
+    role = models.CharField(max_length=10, default='cliente')
 
+    # Define el campo que se usará como nombre de usuario
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
+
 
 class Mesa(models.Model):
     numero = models.IntegerField(unique=True)
