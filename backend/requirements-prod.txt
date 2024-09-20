@@ -1,0 +1,10 @@
+asgiref==3.8.1
+Django==4.2.7
+django-cors-headers==4.4.0
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.3.1
+gunicorn==23.0.0  # Para ejecutar la app en producción
+pillow==10.4.0
+psycopg2-binary==2.9.9  # Si usas PostgreSQL
+python-decouple==3.8  # Para gestionar variables de entorno
+drf-yasg==1.21.7
