@@ -8,6 +8,8 @@ RUN pip install -r requirements.txt
 
 COPY ../../backend/. .
 
+ENV DJANGO_ENV=produccion
+
 FROM builder AS final
 
 EXPOSE 8000

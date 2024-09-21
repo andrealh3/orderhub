@@ -20,6 +20,8 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD_USUARIO}
       DB_HOST: db
       DB_PORT: 5432
+      DJANGO_ENV: desarrollo
+      SECRET_KEY: ${KEY_SECRET}
     
   frontend:
     depends_on:

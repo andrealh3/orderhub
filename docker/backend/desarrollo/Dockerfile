@@ -5,9 +5,11 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /usr/src/app/backend
 
-COPY ../../backend/requirements.txt .
+COPY ../../backend/requirements-dev.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+ENV DJANGO_ENV=desarrollo
 
 EXPOSE 8000
 
