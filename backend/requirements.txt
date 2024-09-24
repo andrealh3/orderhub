@@ -8,3 +8,4 @@ pillow==10.4.0
 psycopg2-binary==2.9.9  # Si usas PostgreSQL
 python-decouple==3.8  # Para gestionar variables de entorno
 drf-yasg==1.21.7
+whitenoise==6.7.0
