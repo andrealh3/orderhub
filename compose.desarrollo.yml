@@ -22,6 +22,7 @@ services:
       DB_PORT: 5432
       DJANGO_ENV: desarrollo
       SECRET_KEY: ${KEY_SECRET}
+      API: ${API}
     
   frontend:
     depends_on:

@@ -15,3 +15,4 @@ PyYAML==6.0.2  # Si usas YAML en tu proyecto
 sqlparse==0.5.0  # Para manejo de SQL
 typing_extensions==4.12.2  # Útil si usas anotaciones de tipo
 uritemplate==4.1.1  # Si necesitas trabajar con plantillas de URI
+whitenoise==6.7.0

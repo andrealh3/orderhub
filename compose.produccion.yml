@@ -17,6 +17,7 @@ services:
       DB_PORT: ${DB_PORT_EXTERNAL}
       DJANGO_ENV: produccion
       SECRET_KEY: ${KEY_SECRET}
+      API: ${API}
     
   frontend:
     build:

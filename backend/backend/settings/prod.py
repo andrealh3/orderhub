@@ -5,7 +5,7 @@ DEBUG = False
 ALLOWED_HOSTS = [
     "127.0.0.1", 
     "localhost",
-    "*"
+    "orderhubbackend-c8351e7b48b8.herokuapp.com",
 ]
 
 CORS_ALLOWED_ORIGINS = [

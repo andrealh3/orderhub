@@ -2,23 +2,51 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 
 class CustomUserManager(BaseUserManager):
+    """
+    Manager personalizado para el modelo User que utiliza el email en lugar del nombre de usuario.
+    """
     def create_user(self, email, password=None, **extra_fields):
-        """Crea y devuelve un usuario con un email y una contraseña"""
+        """
+        Crea y devuelve un usuario con un email y una contraseña.
+        
+        Args:
+            email (str): Dirección de correo electrónico del usuario.
+            password (str, opcional): Contraseña del usuario. Default es None.
+            extra_fields (dict): Campos adicionales para el usuario.
+
+        Raises:
+            ValueError: Si no se proporciona el email.
+
+        Returns:
+            User: El objeto de usuario creado.
+        """
         if not email:
             raise ValueError('El campo Email debe estar establecido')
         email = self.normalize_email(email)
         
-        # Asigna el rol solo si no está ya en extra_fields
         if 'role' not in extra_fields:
-            extra_fields['role'] = 'cliente'  # Asigna el rol 'clientes' por defecto
-        
+            extra_fields['role'] = 'cliente'  # Asigna rol 'cliente' por defecto
+
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
     def create_superuser(self, email, password=None, **extra_fields):
-        """Crea y devuelve un superusuario con un email y una contraseña"""
+        """
+        Crea y devuelve un superusuario con un email y una contraseña.
+        
+        Args:
+            email (str): Dirección de correo del superusuario.
+            password (str, opcional): Contraseña del superusuario. Default es None.
+            extra_fields (dict): Campos adicionales.
+
+        Raises:
+            ValueError: Si is_staff o is_superuser no están configurados como True.
+
+        Returns:
+            User: El superusuario creado.
+        """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
@@ -27,17 +55,21 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('El superusuario debe tener is_superuser=True.')
 
-        # Asegúrate de que el rol se establezca solo si no está presente
-        extra_fields.setdefault('role', 'admin')  # Establece el rol 'admin' para superusuarios
+        extra_fields.setdefault('role', 'admin')  # Asigna el rol 'admin' por defecto
         
         return self.create_user(email, password, **extra_fields)
-    
 
 class User(AbstractUser):
+    """
+    Modelo personalizado de usuario que utiliza el email en lugar del nombre de usuario.
+
+    Attributes:
+        email (EmailField): Dirección de correo única del usuario.
+        role (CharField): Rol del usuario ('cliente' o 'admin').
+    """
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=10, default='cliente')
 
-    # Define el campo que se usará como nombre de usuario
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
@@ -45,16 +77,43 @@ class User(AbstractUser):
 
 
 class Mesa(models.Model):
+    """
+    Modelo que representa una mesa en el restaurante.
+
+    Attributes:
+        numero (IntegerField): Número único de la mesa.
+        capacidad (IntegerField): Capacidad de personas que puede albergar la mesa.
+        estado (CharField): Estado actual de la mesa (libre, ocupada, reservada).
+    """
     numero = models.IntegerField(unique=True)
     capacidad = models.IntegerField()
-    estado = models.CharField(max_length=20, choices=[('libre', 'Libmre'), ('ocupada', 'Ocupada'), ('reservada', 'Reservada')])
+    estado = models.CharField(max_length=20, choices=[('libre', 'Libre'), ('ocupada', 'Ocupada'), ('reservada', 'Reservada')])
 
 class Categoria(models.Model):
+    """
+    Modelo que representa una categoría de productos en el menú.
+
+    Attributes:
+        nombre (CharField): Nombre de la categoría.
+        descripcion (TextField): Descripción de la categoría.
+        imagen (ImageField): Imagen representativa de la categoría.
+    """
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField()
     imagen = models.ImageField(upload_to='categorias', blank=True, null=True)
 
 class Producto(models.Model):
+    """
+    Modelo que representa un producto del menú.
+
+    Attributes:
+        nombre (CharField): Nombre del producto.
+        descripcion (TextField): Descripción detallada del producto.
+        imagen (ImageField): Imagen del producto.
+        precio (DecimalField): Precio del producto.
+        activo (BooleanField): Indica si el producto está activo.
+        categoria (ForeignKey): Relación con la categoría a la que pertenece el producto.
+    """
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField()
     imagen = models.ImageField(upload_to='productos', blank=True, null=True)
@@ -69,6 +128,20 @@ EstadoPedidoEnum = (
 )
 
 class Pedido(models.Model):
+    """
+    Modelo que representa un pedido realizado por un cliente.
+
+    Attributes:
+        cliente (ForeignKey): Cliente que realizó el pedido.
+        empleado (ForeignKey): Empleado encargado del pedido.
+        mesa (ForeignKey): Mesa asignada al pedido (si aplica).
+        fecha (DateField): Fecha en la que se realizó el pedido.
+        hora (TimeField): Hora en la que se realizó el pedido.
+        estado (CharField): Estado actual del pedido (Pendiente, En proceso, Completado).
+        en_linea (BooleanField): Indica si el pedido se realizó en línea.
+        creado_en (DateTimeField): Fecha y hora en que se creó el pedido.
+        cerrado (BooleanField): Indica si el pedido está cerrado.
+    """
     cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos_cliente")
     empleado = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos_empleado")
     mesa = models.ForeignKey(Mesa, on_delete=models.SET_NULL, null=True, blank=True)
@@ -80,6 +153,14 @@ class Pedido(models.Model):
     cerrado = models.BooleanField(default=False)
 
 class DetallePedido(models.Model):
+    """
+    Modelo que representa el detalle de los productos solicitados en un pedido.
+
+    Attributes:
+        pedido (ForeignKey): Pedido al que pertenece el detalle.
+        producto (ForeignKey): Producto incluido en el detalle.
+        cantidad (IntegerField): Cantidad de producto solicitada.
+    """
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='detalles')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
@@ -95,6 +176,16 @@ TipoPagoEnum = (
 )
 
 class Pago(models.Model):
+    """
+    Modelo que representa el pago realizado por un pedido.
+
+    Attributes:
+        pedido (ForeignKey): Pedido asociado al pago.
+        total_pago (DecimalField): Monto total pagado.
+        tipo_pago (CharField): Método de pago (Tarjeta, Efectivo).
+        estado_pago (CharField): Estado del pago (Pendiente, Pagado).
+        creado_en (DateTimeField): Fecha y hora en que se registró el pago.
+    """
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='pagos')
     total_pago = models.DecimalField(max_digits=10, decimal_places=2)
     tipo_pago = models.CharField(max_length=20, choices=TipoPagoEnum)
@@ -102,11 +193,29 @@ class Pago(models.Model):
     creado_en = models.DateTimeField(auto_now_add=True)
 
 class Factura(models.Model):
+    """
+    Modelo que representa una factura generada para un pedido.
+
+    Attributes:
+        pedido (ForeignKey): Pedido asociado a la factura.
+        total (DecimalField): Total a pagar por la factura.
+        estado (CharField): Estado de la factura (Pendiente, Pagada).
+    """
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='facturas')
     total = models.DecimalField(max_digits=10, decimal_places=2)
     estado = models.CharField(max_length=20, choices=[('pendiente', 'Pendiente'), ('pagada', 'Pagada')])
 
 class DetalleFactura(models.Model):
+    """
+    Modelo que representa el detalle de una factura.
+
+    Attributes:
+        factura (ForeignKey): Factura a la que pertenece el detalle.
+        producto (ForeignKey): Producto facturado.
+        cantidad (IntegerField): Cantidad del producto facturado.
+        precio_unitario (DecimalField): Precio unitario del producto.
+        subtotal (DecimalField): Subtotal de este producto en la factura.
+    """
     factura = models.ForeignKey(Factura, on_delete=models.CASCADE, related_name='detalles_factura')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
@@ -120,6 +229,16 @@ EstadoReservaEnum = (
 )
 
 class Reserva(models.Model):
+    """
+    Modelo que representa una reserva de mesa hecha por un cliente.
+
+    Attributes:
+        cliente (ForeignKey): Cliente que realiza la reserva.
+        fecha (DateField): Fecha de la reserva.
+        hora (TimeField): Hora de la reserva.
+        numero_personas (IntegerField): Número de personas para la reserva.
+        estado (CharField): Estado de la reserva (Confirmada, Pendiente, Cancelada).
+    """
     cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reserva_cliente")
     fecha = models.DateField()
     hora = models.TimeField()
@@ -133,6 +252,17 @@ EstadoEnvioEnum = (
 )
 
 class Envio(models.Model):
+    """
+    Modelo que representa el envío de un pedido realizado en línea.
+
+    Attributes:
+        pedido (OneToOneField): Pedido al que está asociado el envío.
+        direccion (CharField): Dirección de entrega.
+        ciudad (CharField): Ciudad de entrega.
+        codigo_postal (CharField): Código postal de la dirección de entrega.
+        estado_envio (CharField): Estado del envío (Pendiente, En tránsito, Entregado).
+        fecha_entrega (DateTimeField): Fecha y hora de la entrega.
+    """
     pedido = models.OneToOneField(Pedido, on_delete=models.CASCADE, related_name='envio', null=True, blank=True)
     direccion = models.CharField(max_length=200)
     ciudad = models.CharField(max_length=100)
@@ -141,6 +271,15 @@ class Envio(models.Model):
     fecha_entrega = models.DateTimeField(blank=True, null=True)
 
 class EmpleadoTurno(models.Model):
+    """
+    Modelo que representa el turno de un empleado.
+
+    Attributes:
+        empleado (ForeignKey): Empleado que realiza el turno.
+        fecha (DateField): Fecha del turno.
+        hora_entrada (TimeField): Hora de entrada del empleado.
+        hora_salida (TimeField): Hora de salida del empleado.
+    """
     empleado = models.ForeignKey(User, on_delete=models.CASCADE, related_name='turnos')
     fecha = models.DateField()
     hora_entrada = models.TimeField()
