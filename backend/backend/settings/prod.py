@@ -5,12 +5,12 @@ DEBUG = False
 ALLOWED_HOSTS = [
     "127.0.0.1", 
     "localhost",
-    "orderhubbackend-c8351e7b48b8.herokuapp.com",
+    "orderhub-c5ab90f90cdb.herokuapp.com",
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://orderhubbackend-c8351e7b48b8.herokuapp.com',
-    'https://order-hub-eight.vercel.app',
+    'https://orderhub-c5ab90f90cdb.herokuapp.com',
+    'https://orderhub.vercel.app',
 ]
 
 SECURE_BROWSER_XSS_FILTER = True
