@@ -17,7 +17,7 @@ services:
       DB_PORT: ${DB_PORT_EXTERNAL}
       DJANGO_ENV: produccion
       SECRET_KEY: ${KEY_SECRET}
-      API: ${API}
+      API: ${VITE_API_URL}
     
   frontend:
     build:
@@ -28,6 +28,8 @@ services:
       - "80:80"
     networks:
       - network
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
   
 networks:
   network:
