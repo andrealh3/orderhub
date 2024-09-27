@@ -40,8 +40,6 @@ export const registrarUsuario = (datos) => {
     });
 };
 
-
-
 export const agregarUsuario = (datos) => {
   const token = getToken();
   const url = `${BASE_API}/usuario/`;

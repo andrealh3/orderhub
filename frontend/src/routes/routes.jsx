@@ -5,6 +5,7 @@ import { AdminRoutes } from './routes.admin';
 import { BasicLayout } from '../layout/BasicLayout';
 import { useAuth } from '../hooks/useAuth';
 import { UserLayout } from '../layout/UserLayout';
+import { CreateUser } from '../pages/CreateUser';
 
 export const AppRoutes = () => {
   const { auth } = useAuth();
@@ -15,6 +16,7 @@ export const AppRoutes = () => {
   return (
     <UserLayout>
       <Routes>
+        <Route path="/crear" element={<CreateUser />} />
         {isCliente && <Route path="/*" element={<ClienteRoutes />} />}
         {isAdmin && <Route path="/admin/*" element={<AdminRoutes />} />}
         <Route path="*" element={
