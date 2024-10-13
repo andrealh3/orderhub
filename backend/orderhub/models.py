@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+import os
 
 class CustomUserManager(BaseUserManager):
     """
@@ -101,6 +102,24 @@ class Categoria(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField()
     imagen = models.ImageField(upload_to='categorias', blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        # Verificar si la instancia ya existe para eliminar la imagen anterior
+        if self.pk:  # Si ya existe, es una actualización
+            old_instance = Categoria.objects.get(pk=self.pk)
+            if old_instance.imagen and old_instance.imagen != self.imagen:
+                # Eliminar la imagen anterior si existe
+                if os.path.isfile(old_instance.imagen.path):
+                    os.remove(old_instance.imagen.path)
+        
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Eliminar la imagen al eliminar la instancia
+        if self.imagen:
+            if os.path.isfile(self.imagen.path):
+                os.remove(self.imagen.path)
+        super().delete(*args, **kwargs)
 
 class Producto(models.Model):
     """
