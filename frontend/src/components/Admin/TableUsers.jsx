@@ -46,12 +46,16 @@ export const TableUsers = ({users, actualizarUsuario, eliminarUsuario }) => {
 const Editar = ({user, actualizarUsuario, eliminarUsuario}) => {
   return (
     <td>
-      <Button variant="outline-primary" onClick={() => actualizarUsuario(user)} className="me-2"> {/* Espaciado con 'me-2' */}
-        <BsPencil /> {/* Icono de lápiz */}
-      </Button>
-      <Button variant="outline-danger" onClick={() => eliminarUsuario(user)} >
-        <BsX /> {/* Icono de cerrar */}
-      </Button>
+      <>
+        <Button variant="outline-primary" onClick={() => actualizarUsuario(user)} className="me-2"> {/* Espaciado con 'me-2' */}
+          <BsPencil /> 
+        </Button>
+        {user.id !== currentUserId && (
+        <Button variant="outline-danger" onClick={() => eliminarUsuario(user)} >
+          <BsX />
+        </Button>
+        )}
+      </>
     </td>  
   )
 }

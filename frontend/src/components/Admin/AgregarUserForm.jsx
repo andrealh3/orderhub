@@ -9,12 +9,18 @@ export const AgregarUserLogin = ({ onClose, onRefetch, user }) => {
   const [error, setError] = useState(''); // Estado para almacenar mensajes de error
   const [loading, setLoading] = useState(false); // Estado que indica si se está cargando
 
+  const isAdmin = auth?.me?.is_superuser;
+
+  // Definir los campos del formulario, excluyendo 'is_staff' e 'is_superuser' si el usuario actual es superusuario.
   const campos = [
-    { name: 'username', label: 'Username', type: 'text'},
+    { name: 'username', label: 'Username', type: 'text' },
     { name: 'email', label: 'Correo Electrónico', type: 'email' },
     { name: 'password', label: 'Contraseña', type: 'password' },
-    { name: 'is_staff', label: 'Usuario staff', type: 'checkbox' },
-    { name: 'is_superuser', label: 'Superusuario', type: 'checkbox' },
+    // Solo mostrar los campos 'is_staff' e 'is_superuser' si el usuario actual NO es superusuario
+    ...(!isAdmin ? [
+      { name: 'is_staff', label: 'Usuario staff', type: 'checkbox' },
+      { name: 'is_superuser', label: 'Superusuario', type: 'checkbox' },
+    ] : []),
   ];
 
   const handleSubmit = (valores) => {
