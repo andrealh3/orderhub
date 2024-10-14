@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { AgregarCategoriaForm } from "./AgregarCategoriaForm";
-import { HeaderPage } from "../HeaderPage";
-import { ListarCategorias } from "./ListarCategorias";
-import { obtenerCategoriasApi, eliminarCategoriaApi } from "../../../services/CategoriaService";
-import { ModalBasic } from "../../Common/ModalBasic";
+import { AgregarCategoriaForm } from "../../components/Admin/Categorias/AgregarCategoriaForm";
+import { HeaderPage } from "../../components/Admin/HeaderPage";
+import { ListarCategorias } from "../../components/Admin/Categorias/ListarCategorias";
+import { obtenerCategoriasApi, eliminarCategoriaApi } from "../../services/CategoriaService";
+import { ModalBasic } from "../../components/Common/ModalBasic";
 import { Spinner } from "react-bootstrap";
 
 export const CategoriasAdmin = () => {

@@ -3,9 +3,9 @@ import { Routes, Route } from 'react-router-dom';
 import { Error404 } from '../pages/Error404';
 import { BasicLayout } from '../layout/BasicLayout';
 import { HomeAdmin } from '../pages/Admin/HomeAdmin';
-import { UserAdmin } from '../components/Admin/Users/UserAdmin';
-import { CategoriasAdmin } from '../components/Admin/Categorias/CategoriasAdmin';
+import { CategoriasAdmin } from '../pages/Admin/CategoriasAdmin';
 import { ProductosAdmin } from '../pages/Admin/ProductosAdmin';
+import { UserAdmin } from '../pages/Admin/UserAdmin';
 
 export const AdminRoutes = () => {
   return (

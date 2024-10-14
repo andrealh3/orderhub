@@ -3,7 +3,7 @@ import { GenericForm } from './GenericForm';
 import { Link, useNavigate } from 'react-router-dom';
 import { getToken, setToken } from '../utils/constants';
 import { useAuth } from '../hooks/useAuth';
-import { registrarUsuario } from '../services/UserService';
+import { registrarUsuarioApi } from '../services/UserService';
 
 
 export const CreateUserForm = () => {
@@ -23,7 +23,7 @@ export const CreateUserForm = () => {
   const handleSubmit = (valores) => {
     setLoading(true); // Indica que el proceso de inicio de sesión está en curso
     setError(''); // Resetea el mensaje de error
-    registrarUsuario(valores)
+    registrarUsuarioApi(valores)
       .then(( { user, accessToken, refreshToken } ) => {
         setToken(accessToken, refreshToken);
         setAuth({ token: getToken(), me: user });

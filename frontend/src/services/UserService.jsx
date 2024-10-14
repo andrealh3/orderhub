@@ -1,10 +1,13 @@
 import { BASE_API, getToken} from "../utils/constants";
 import { fetchWithToken } from "./fetchWithToken";
 
-export const obtenerUsuarios = () => {
+export const obtenerUsuariosApi = () => {
+  const token = getToken()
   const url = `${BASE_API}/usuario/`;
   const parametros = {
-    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   };
 
   return fetchWithToken(url, parametros)
@@ -14,7 +17,7 @@ export const obtenerUsuarios = () => {
     });
 };
 
-export const registrarUsuario = (datos) => {
+export const registrarUsuarioApi = (datos) => {
   const url = `${BASE_API}/usuario/`;
   const parametros = {
     method: "POST",
@@ -38,12 +41,15 @@ export const registrarUsuario = (datos) => {
     });
 };
 
-export const agregarUsuario = (datos) => {
+export const agregarUsuarioApi = (datos) => {
+  const token = getToken()
+
   const url = `${BASE_API}/usuario/`;
   const parametros = {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(datos),
   };
@@ -52,7 +58,7 @@ export const agregarUsuario = (datos) => {
     .then(respuesta => {
       if (!respuesta.ok) {
         return respuesta.json().then(errorData => {
-          throw new Error(errorData.detail || 'Error al crear usuario');
+          throw new Error(errorData.detail || 'Error al crear categoria');
         });
       }
       return respuesta.json();
@@ -63,16 +69,18 @@ export const agregarUsuario = (datos) => {
 };
 
 
-export const actualizarUsuario = (id, datos) => {
+export const actualizarUsuarioApi = (id, datos) => {
+  const token = getToken()
   const url = `${BASE_API}/usuario/${id}/`;
   const parametros = {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(datos),
   };
-
+  
   return fetchWithToken(url, parametros)
     .then(respuesta => respuesta.json())
     .catch(error => {
@@ -82,17 +90,26 @@ export const actualizarUsuario = (id, datos) => {
 
 
 export const eliminarUsuarioApi = (id) => {
+  const token = getToken();
   const url = `${BASE_API}/usuario/${id}/`;
   const parametros = {
     method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   };
 
   return fetchWithToken(url, parametros)
     .then(respuesta => {
+      // Comprobar si la respuesta tiene contenido
       if (respuesta.status === 204) {
-        return {};  // Sin contenido, usuario eliminado
+        return {}; // Si es No Content, devuelve un objeto vacío
+      } else if (!respuesta.ok) {
+        return respuesta.json().then(errorData => {
+          throw new Error(errorData.detail || 'Error al eliminar la categoría');
+        });
       }
-      return respuesta.json();
+      return respuesta.json(); // Si hay contenido, lo parseamos
     })
     .catch(error => {
       throw error;

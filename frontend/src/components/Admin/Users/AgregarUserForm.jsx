@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { GenericForm } from "../GenericForm";
-import { actualizarUsuario, agregarUsuario } from "../../services/UserService";
-import { getToken } from "../../utils/constants";
-import { useAuth } from "../../hooks/useAuth";
+import { GenericForm } from "../../GenericForm";
+import { actualizarUsuarioApi, agregarUsuarioApi } from "../../../services/UserService";
+import { useAuth } from "../../../hooks/useAuth";
 
 export const AgregarUserLogin = ({ onClose, onRefetch, user }) => {
   const { auth, actualizarAuth } = useAuth();
@@ -24,9 +23,9 @@ export const AgregarUserLogin = ({ onClose, onRefetch, user }) => {
   const handleSubmit = (valores) => {
     setLoading(true); // Indica que el proceso de inicio de sesión está en curso
     setError('');
+    valores.role = valores.is_superuser ? 'admin' : 'cliente';
     if (user) {
-      const token = getToken();
-      actualizarUsuario(user.id, valores, token)
+      actualizarUsuarioApi(user.id, valores)
         .then(() => {
           if (auth?.me?.id === user.id) {
             actualizarAuth(valores); // Actualiza el estado de autenticación
@@ -41,8 +40,7 @@ export const AgregarUserLogin = ({ onClose, onRefetch, user }) => {
           setLoading(false);
         })
     } else {
-      valores.role = valores.is_superuser ? 'admin' : 'cliente';
-      agregarUsuario(valores)
+      agregarUsuarioApi(valores)
         .then(() => {
           onRefetch();
           onClose();
