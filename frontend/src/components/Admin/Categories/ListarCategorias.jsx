@@ -1,7 +1,7 @@
 import { Button, Table } from "react-bootstrap";
 import { BsPencil, BsX } from 'react-icons/bs';
 
-export const TablaCategoria = ({ categoria, actualizarCategoria, eliminarCategoria }) => {
+export const ListarCategorias = ({ categoria, actualizarCategoria, eliminarCategoria }) => {
   return (
     <Table striped bordered hover>
       <thead>

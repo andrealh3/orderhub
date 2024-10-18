@@ -12,12 +12,11 @@ import React, { useState, useEffect } from 'react';
  * @returns {JSX.Element} - Un formulario con campos definidos dinámicamente.
  */
 export const GenericForm = ({ campos, loading, onSubmit, infoBoton, initialValues = {} }) => {
-  // Estado para almacenar los valores del formulario, inicializado con `initialValues`
+  // Estado para almacenar los valores del formulario, inicializado con initialValues
   const [valoresFormulario, setValoresFormulario] = useState(initialValues);
 
-  // Actualiza los valores del formulario cuando `initialValues` cambia (para edición)
+  // Actualiza los valores del formulario cuando initialValues cambia (para edición)
   useEffect(() => {
-    // Asegura que solo se actualicen los valores del formulario si hay datos en initialValues
     if (Object.keys(initialValues).length > 0) {
       setValoresFormulario(initialValues);
     }
@@ -27,18 +26,10 @@ export const GenericForm = ({ campos, loading, onSubmit, infoBoton, initialValue
   const handleChange = (e) => {
     const { name, type, value, checked, files } = e.target;
 
-    // Maneja la entrada de archivos
-    if (type === 'file') {
-      setValoresFormulario({
-        ...valoresFormulario,
-        [name]: files[0], // Guarda el archivo seleccionado
-      });
-    } else {
-      setValoresFormulario({
-        ...valoresFormulario,
-        [name]: type === 'checkbox' ? checked : value, // Maneja el checkbox como booleano
-      });
-    }
+    setValoresFormulario((prev) => ({
+      ...prev,
+      [name]: type === 'file' ? files[0] : type === 'checkbox' ? checked : value,
+    }));
 
     // Si se marca 'is_superuser', también marca 'is_staff'
     if (name === 'is_superuser' && checked === true) {
@@ -67,22 +58,56 @@ export const GenericForm = ({ campos, loading, onSubmit, infoBoton, initialValue
               id={campo.name}
               checked={valoresFormulario[campo.name] || false}
               onChange={(e) => {
-                handleChange(e); // Llamada al manejo interno de cambios
-                if (campo.onChange) campo.onChange(e); // Si hay un onChange específico, también lo ejecuta
+                handleChange(e);
+                if (campo.onChange) campo.onChange(e);
               }}
-              disabled={campo.name === 'is_staff' && valoresFormulario.is_superuser} // Deshabilita si es superusuario
+              disabled={campo.name === 'is_staff' && valoresFormulario.is_superuser}
             />
+          ) : campo.type === 'file' ? (
+            <input
+              type="file"
+              name={campo.name}
+              id={campo.name}
+              accept={campo.accept || 'image/*'}
+              onChange={(e) => {
+                handleChange(e);
+                if (campo.onChange) campo.onChange(e);
+              }}
+            />
+          ) : campo.type === 'select' ? (
+            <div>
+              <select
+                name={campo.name}
+                id={campo.name}
+                value={valoresFormulario[campo.name] || ''}
+                onChange={(e) => {
+                  handleChange(e);
+                  if (campo.onChange) campo.onChange(e);
+                }}
+              >
+                <option value="">Seleccione una opción</option>
+                {campo.options?.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {campo.renderExtraAction && (
+                <div>
+                  {campo.renderExtraAction()}
+                </div>
+              )}
+            </div>
           ) : (
             <input
               type={campo.type}
               name={campo.name}
               id={campo.name}
-              value={campo.type === 'file' ? undefined : valoresFormulario[campo.name] || ''}
+              value={valoresFormulario[campo.name] || ''}
               onChange={(e) => {
-                handleChange(e); // Llamada al manejo interno de cambios
-                if (campo.onChange) campo.onChange(e); // Si hay un onChange específico, también lo ejecuta
+                handleChange(e);
+                if (campo.onChange) campo.onChange(e);
               }}
-              accept={campo.type === 'file' ? 'image/*' : undefined} // Acepta solo imágenes si es tipo file
             />
           )}
         </div>

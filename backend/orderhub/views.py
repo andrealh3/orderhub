@@ -9,6 +9,7 @@ from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser, FormParser
+from django_filters.rest_framework import DjangoFilterBackend
 
 class UserApiViewSet(ModelViewSet):
     """
@@ -81,6 +82,8 @@ class UserApiViewSet(ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['username']
 
     def create(self, request, *args, **kwargs):
         request.data['password'] = make_password(request.data['password'])
@@ -108,20 +111,7 @@ class UserApiViewSet(ModelViewSet):
         else:
             request.data['password'] = self.get_object().password
         return super().partial_update(request, *args, **kwargs)
-
-    @action(detail=False, methods=['get'], url_path='username')
-    def retrieve_by_username(self, request):
-        username = request.query_params.get('username')
-        if username:
-            try:
-                user = User.objects.get(username=username)
-                serializer = self.get_serializer(user)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except User.DoesNotExist:
-                return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response({'detail': 'Username parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
-
+    
 
 class UserView(APIView):
     """
@@ -328,6 +318,8 @@ class ProductoViewSet(ModelViewSet):
     """
     serializer_class = ProductoSerializer
     queryset = Producto.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['categoria', 'activo']
 
 
 class PedidoViewSet(ModelViewSet):

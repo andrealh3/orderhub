@@ -18,6 +18,7 @@ class CategoriaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProductoSerializer(serializers.ModelSerializer):
+    categoria_data = CategoriaSerializer(source='categoria', read_only=True)
     class Meta:
         model = Producto
         fields = '__all__'

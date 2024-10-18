@@ -51,9 +51,9 @@ const Editar = ({user, actualizarUsuario, eliminarUsuario}) => {
           <BsPencil /> 
         </Button>
         {user.id !== currentUserId && (
-        <Button variant="outline-danger" onClick={() => eliminarUsuario(user)} >
-          <BsX />
-        </Button>
+          <Button variant="outline-danger" onClick={() => eliminarUsuario(user)} >
+            <BsX />
+          </Button>
         )}
       </>
     </td>  

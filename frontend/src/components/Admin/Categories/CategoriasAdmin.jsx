@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AgregarCategoriaForm } from "./AgregarCategoriaForm";
 import { HeaderPage } from "../HeaderPage";
-import { TablaCategoria } from "./ListarCategorias";
+import { ListarCategorias } from "./ListarCategorias";
 import { obtenerCategoriasApi, eliminarCategoriaApi } from "../../../services/CategoriaService";
 import { ModalBasic } from "../../Common/ModalBasic";
 import { Spinner } from "react-bootstrap";
@@ -73,7 +73,7 @@ export const CategoriasAdmin = () => {
           <p>Cargando...</p>
         </div>
       ) : (
-        <TablaCategoria categoria={categoria} actualizarCategoria={actualizarCategoria} eliminarCategoria={eliminarCategoria} />
+        <ListarCategorias categoria={categoria} actualizarCategoria={actualizarCategoria} eliminarCategoria={eliminarCategoria} />
       )}
       <ModalBasic show={showModal} size="lg" onClose={openCloseModal} title={titleModal} children={contentModal} />
       {error && <p style={{ color: "red" }}>{error}</p>} {/* Mostrar mensajes de error */}

@@ -140,6 +140,24 @@ class Producto(models.Model):
     activo = models.BooleanField(default=True)
     categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        # Verificar si la instancia ya existe para eliminar la imagen anterior
+        if self.pk:  # Si ya existe, es una actualización
+            old_instance = Producto.objects.get(pk=self.pk)
+            if old_instance.imagen and old_instance.imagen != self.imagen:
+                # Eliminar la imagen anterior si existe
+                if os.path.isfile(old_instance.imagen.path):
+                    os.remove(old_instance.imagen.path)
+        
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Eliminar la imagen al eliminar la instancia
+        if self.imagen:
+            if os.path.isfile(self.imagen.path):
+                os.remove(self.imagen.path)
+        super().delete(*args, **kwargs)
+
 EstadoPedidoEnum = (
     ("PENDIENTE", "Pendiente"),
     ("EN_PROCESO", "En proceso"),
