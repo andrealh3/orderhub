@@ -103,11 +103,12 @@ export const GenericForm = ({ campos, loading, onSubmit, infoBoton, initialValue
               type={campo.type}
               name={campo.name}
               id={campo.name}
-              value={valoresFormulario[campo.name] || ''}
+              value={campo.value ? campo.value : valoresFormulario[campo.name] || ''}
               onChange={(e) => {
                 handleChange(e);
                 if (campo.onChange) campo.onChange(e);
               }}
+              readOnly={campo.readOnly}
             />
           )}
         </div>

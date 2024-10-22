@@ -192,6 +192,17 @@ class MesaViewSet(ModelViewSet):
     serializer_class = MesaSerializer
     queryset = Mesa.objects.all().order_by('numero')
 
+    @action(detail=False, methods=['get'])
+    def siguiente_numero(self, request):
+        # Obtener el siguiente número de mesa
+        numeros_ocupados = set(Mesa.objects.values_list('numero', flat=True))
+        siguiente_numero = 1
+        
+        while siguiente_numero in numeros_ocupados:
+            siguiente_numero += 1
+
+        return Response({'siguiente_numero': siguiente_numero})
+
 
 class CategoriaViewSet(ModelViewSet):
     """

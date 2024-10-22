@@ -6,6 +6,7 @@ import { HomeAdmin } from '../pages/Admin/HomeAdmin';
 import { CategoriasAdmin } from '../pages/Admin/CategoriasAdmin';
 import { ProductosAdmin } from '../pages/Admin/ProductosAdmin';
 import { UserAdmin } from '../pages/Admin/UserAdmin';
+import { MesasAdmin } from '../pages/Admin/MesasAdmin';
 
 export const AdminRoutes = () => {
   return (
@@ -14,6 +15,7 @@ export const AdminRoutes = () => {
       <Route path="/users" element={<UserAdmin />} />
       <Route path="/categories" element={<CategoriasAdmin />} />
       <Route path="/products" element={<ProductosAdmin />} />
+      <Route path="/tables" element={<MesasAdmin />} />
       <Route path="*" element={
         <BasicLayout>
           <Error404 />

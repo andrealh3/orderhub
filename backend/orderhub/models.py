@@ -99,7 +99,7 @@ class Categoria(models.Model):
         descripcion (TextField): Descripción de la categoría.
         imagen (ImageField): Imagen representativa de la categoría.
     """
-    nombre = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=100, unique=True)
     descripcion = models.TextField()
     imagen = models.ImageField(upload_to='categorias', blank=True, null=True)
 
