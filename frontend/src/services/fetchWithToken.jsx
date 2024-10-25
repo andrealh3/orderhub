@@ -2,7 +2,7 @@ import { getRefreshToken, getToken, setToken } from "../utils/constants";
 import { refreshToken } from "./AuthService";
 
 // Función para manejar el fetch y refrescar el token si ha expirado
-export const fetchWithToken = (url, options = {}) => {
+export const fetchWithToken = async (url, options = {}) => {
   const token = getToken();
 
   // Añadir el token a las cabeceras si no está ya
@@ -12,32 +12,32 @@ export const fetchWithToken = (url, options = {}) => {
   };
 
   // Realizar la solicitud con el token actual
-  return fetch(url, { ...options, headers })
-    .then(response => {
-      if (response.status === 401) {
-        // Si es 401, intenta refrescar el token
-        const refresh = getRefreshToken()
-        return refreshToken(refresh).then(({access}) => {
-          if (!access) {
-            throw new Error("No se pudo refrescar el token");
-          }
+  try {
+    let response = await fetch(url, { ...options, headers });
 
-          setToken(access, refresh);
+    if (response.status === 401) {
+      // Si es 401, intenta refrescar el token
+      const refresh = getRefreshToken();
+      const { access } = await refreshToken(refresh);
 
-          // Actualizar el token en las cabeceras
-          const newHeaders = {
-            ...options.headers,
-            Authorization: `Bearer ${access}`,
-          };
-
-          // Reintentar la solicitud original con el nuevo token
-          return fetch(url, { ...options, headers: newHeaders });
-        });
+      if (!access) {
+        throw new Error("No se pudo refrescar el token");
       }
 
-      return response;
-    })
-    .catch(error => {
-      throw error;
-    });
+      setToken(access, refresh);
+
+      // Actualizar el token en las cabeceras
+      const newHeaders = {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${access}`,
+      };
+
+      // Reintentar la solicitud original con el nuevo token
+      response = await fetch(url, { ...options, headers: newHeaders });
+    }
+
+    return response; // Retornar la respuesta, ya sea inicial o la reintentada
+  } catch (error) {
+    throw error; // Lanzar el error si ocurre
+  }
 };

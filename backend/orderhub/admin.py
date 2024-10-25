@@ -33,7 +33,7 @@ admin.site.register(Producto, ProductoAdmin)
 
 class PedidoAdmin(admin.ModelAdmin):
     list_display = ('cliente', 'empleado', 'mesa', 'estado', 'creado_en')
-    search_fields = ('cliente__email', 'empleado__email', 'estado')
+    search_fields = ('mesa', 'estado')
     list_filter = ('estado', 'en_linea')
     ordering = ('-creado_en',)
 

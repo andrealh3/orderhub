@@ -17,3 +17,9 @@ export const removeToken = () => {
   sessionStorage.removeItem("accessToken");  // Eliminar el token de acceso
   sessionStorage.removeItem("refreshToken");  // Eliminar el token de refresco
 };
+
+export const ESTADO_PEDIDO = {
+  PENDIENTE: "PENDIENTE",
+  EN_PROCESO: "EN_PROCESO",
+  COMPLETADO: "COMPLETADO"
+}

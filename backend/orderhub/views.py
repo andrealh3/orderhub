@@ -10,6 +10,7 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter
 
 class UserApiViewSet(ModelViewSet):
     """
@@ -69,15 +70,6 @@ class UserApiViewSet(ModelViewSet):
         
         Respuestas:
             dict: Confirmación de la eliminación.
-    
-    retrieve_by_username:
-        Obtiene los detalles de un usuario basado en su nombre de usuario.
-        
-        Parámetros:
-            username (str): Nombre de usuario del usuario solicitado.
-        
-        Respuestas:
-            dict: Detalle del usuario solicitado o error si no se encuentra.
     """
     serializer_class = UserSerializer
     queryset = User.objects.all()
@@ -108,9 +100,20 @@ class UserApiViewSet(ModelViewSet):
         password = request.data.get('password')
         if password:
             request.data['password'] = make_password(password)
-        else:
-            request.data['password'] = self.get_object().password
         return super().partial_update(request, *args, **kwargs)
+    
+    def update(self, request, *args, **kwargs):
+        user = self.get_object()
+
+        password = request.data.get('password')
+        if password:
+            request.data['password'] = make_password(password)
+
+        serializer = self.get_serializer(user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 
 class UserView(APIView):
@@ -191,18 +194,6 @@ class MesaViewSet(ModelViewSet):
     """
     serializer_class = MesaSerializer
     queryset = Mesa.objects.all().order_by('numero')
-
-    @action(detail=False, methods=['get'])
-    def siguiente_numero(self, request):
-        # Obtener el siguiente número de mesa
-        numeros_ocupados = set(Mesa.objects.values_list('numero', flat=True))
-        siguiente_numero = 1
-        
-        while siguiente_numero in numeros_ocupados:
-            siguiente_numero += 1
-
-        return Response({'siguiente_numero': siguiente_numero})
-
 
 class CategoriaViewSet(ModelViewSet):
     """
@@ -394,6 +385,10 @@ class PedidoViewSet(ModelViewSet):
     """
     serializer_class = PedidoSerializer
     queryset = Pedido.objects.all()
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['mesa']
+    ordering_fields = '__all__'
+    ordering = ['id']
 
 
 class DetallePedidoViewSet(ModelViewSet):

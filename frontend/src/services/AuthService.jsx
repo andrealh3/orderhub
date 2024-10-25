@@ -1,10 +1,12 @@
-import { BASE_API, removeToken, setToken } from "../utils/constants";
+import { BASE_API, getToken, removeToken, setToken } from "../utils/constants";
 
 export const iniciarSesion = (valoresFormulario) => {
+  const token = getToken();
   const url = `${BASE_API}/autor/login/`;
   const parametros = {
     method: "POST",
     headers: {
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(valoresFormulario),
@@ -76,7 +78,7 @@ export const refreshToken = (refresh) => {
           if (response.status === 401) {
             throw new Error('No autorizado. Por favor, verifica tus credenciales.');
           } else if (response.status === 404) {
-            throw new Error('Recurso no encontrado.');
+            throw new Error('Recurso no encontrado.'); 
           } else {
             throw new Error('Error en la petición. Código de estado: ' + response.status);
           }

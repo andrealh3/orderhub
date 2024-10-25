@@ -23,14 +23,19 @@ class ProductoSerializer(serializers.ModelSerializer):
         model = Producto
         fields = '__all__'
 
-class PedidoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Pedido
-        fields = '__all__'
-
 class DetallePedidoSerializer(serializers.ModelSerializer):
+    producto_data = ProductoSerializer(source='producto', read_only=True)
     class Meta:
         model = DetallePedido
+        fields = '__all__'
+
+class PedidoSerializer(serializers.ModelSerializer):
+    cliente_data = UserSerializer(source='cliente', read_only=True)
+    empleado_data = UserSerializer(source='empleado', read_only=True)
+    detalles_pedido_data = DetallePedidoSerializer(source='detalles', many=True, read_only=True)
+    mesa_data = MesaSerializer(source='mesa', read_only=True)
+    class Meta:
+        model = Pedido
         fields = '__all__'
 
 class PagoSerializer(serializers.ModelSerializer):
@@ -38,14 +43,14 @@ class PagoSerializer(serializers.ModelSerializer):
         model = Pago
         fields = '__all__'
     
-class FacturaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Factura
-        fields = '__all__'
-
 class DetalleFacturaSerializer(serializers.ModelSerializer):
     class Meta:
         model = DetalleFactura
+        fields = '__all__'
+
+class FacturaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Factura
         fields = '__all__'
     
 class ReservaSerializer(serializers.ModelSerializer):

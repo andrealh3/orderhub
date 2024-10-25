@@ -2,7 +2,6 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from '../../hooks/useAuth';
-import { useEffect } from 'react';
 
 export const Menu = () => {
   const { auth, logout } = useAuth();

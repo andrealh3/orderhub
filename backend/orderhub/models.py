@@ -179,8 +179,8 @@ class Pedido(models.Model):
         creado_en (DateTimeField): Fecha y hora en que se creó el pedido.
         cerrado (BooleanField): Indica si el pedido está cerrado.
     """
-    cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos_cliente")
-    empleado = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos_empleado")
+    cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos_cliente", blank=True, null=True)
+    empleado = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos_empleado", blank=True, null=True)
     mesa = models.ForeignKey(Mesa, on_delete=models.SET_NULL, null=True, blank=True)
     fecha = models.DateField()
     hora = models.TimeField()
@@ -188,6 +188,17 @@ class Pedido(models.Model):
     en_linea = models.BooleanField(default=False)
     creado_en = models.DateTimeField(auto_now_add=True)
     cerrado = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        # Verificar si la mesa está ocupada
+        if self.mesa and self.mesa.estado == 'ocupada':
+            # Buscar el último pedido activo de la misma mesa
+            ultimo_pedido = Pedido.objects.filter(mesa=self.mesa, cerrado=False).last()
+            if ultimo_pedido:
+                # Asignar cliente y empleado del último pedido activo al nuevo pedido
+                self.cliente = ultimo_pedido.cliente
+                self.empleado = ultimo_pedido.empleado
+        super().save(*args, **kwargs)
 
 class DetallePedido(models.Model):
     """
@@ -200,7 +211,7 @@ class DetallePedido(models.Model):
     """
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='detalles')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
-    cantidad = models.IntegerField()
+    cantidad = models.IntegerField(default=1)
 
 EstadoPagoEnum = (
     ("PENDIENTE", "Pendiente"),
