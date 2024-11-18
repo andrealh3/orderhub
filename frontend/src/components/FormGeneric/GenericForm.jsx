@@ -62,9 +62,8 @@ export const GenericForm = ({ campos, loading, onSubmit, infoBoton, initialValue
             />
           ) : campo.type === 'select' ? (
             <SearchableDropdown
-              label={campo.name}
-              options={campo.options}
-              onSelect={(option) => handleChange({ target: { name: campo.name, value: option.value } })}
+              campo={campo}
+              valoresFormulario={valoresFormulario}
             />
           ) : campo.type === 'dropdown' && campo.searchable ? (
             <SelectionDropdown

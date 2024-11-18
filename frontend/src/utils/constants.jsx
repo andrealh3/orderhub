@@ -21,5 +21,10 @@ export const removeToken = () => {
 export const ESTADO_PEDIDO = {
   PENDIENTE: "PENDIENTE",
   EN_PROCESO: "EN_PROCESO",
-  COMPLETADO: "COMPLETADO"
+  COMPLETADO: "COMPLETADO",
+}
+
+export const ESTADO_PAGO = {
+  PENDIENTE: "PENDIENTE",
+  PAGADO: "PAGADO",
 }

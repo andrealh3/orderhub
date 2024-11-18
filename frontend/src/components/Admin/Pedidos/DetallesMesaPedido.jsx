@@ -113,9 +113,9 @@ export const DetallesMesaPedido = () => {
                 value: usuario.id,
                 label: usuario.username
               })),
-              onChange: (value) => {
-                const persona = value && value[0];
-                handleChange("cliente", persona);
+              onChange: (persona) => {
+                const {value} = persona && persona[0];
+                handleChange("cliente", value);
               }
             },
             {
@@ -128,9 +128,9 @@ export const DetallesMesaPedido = () => {
                 value: usuario.id, 
                 label: usuario.username
               })),
-              onChange: (value) => {
-                const persona = value && value[0];
-                handleChange("empleado", persona);
+              onChange: (persona) => {
+                const {value} = persona && persona[0];
+                handleChange("empleado", value);
               }
             },
           ]}
