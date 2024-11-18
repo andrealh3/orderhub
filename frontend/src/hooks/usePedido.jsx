@@ -1,5 +1,4 @@
-// usePedidoService.js
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import {
   obtenerPedidosPorMesaApi,
   verificarPedidoEntregadoApi,
@@ -7,96 +6,74 @@ import {
   agregarPagoAPedidoApi,
   cerrarPedidoApi,
   obtenerPedidosPorPagoApi,
+  verificarPedidoEnProcesoApi,
 } from "../services/PedidoService";
 
 export const usePedido = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [pedidos, setPedidos] = useState(null);
 
-  // Obtener pedidos por mesa
-  const obtenerPedidosPorMesa = useCallback(async (idMesa, estado = "", ordenamiento = "") => {
-    setLoading(true);
-    setError(null);
+  const obtenerPedidosPorMesa = async (idMesa, estado = [], ordenamiento = "") => {
     try {
-      const result = await obtenerPedidosPorMesaApi(idMesa, estado, ordenamiento);
-      setPedidos(result);
-    } catch (err) {
-      setError(err.message);
-    } finally {
+      setLoading(true);
+      const respuesta = await obtenerPedidosPorMesaApi(idMesa, estado, ordenamiento);
+      setPedidos(respuesta);
+    } catch (error) {
+      setError(error.message);
+    } finally{
       setLoading(false);
     }
-  }, []);
-
-  // Verificar pedido entregado
-  const verificarPedidoEntregado = useCallback(async (id) => {
-    setLoading(true);
-    setError(null);
+  };
+  
+  const verificarPedidoEntregado = async (idPedido) => {
     try {
-      const result = await verificarPedidoEntregadoApi(id);
-      setPedidos(result);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      await verificarPedidoEntregadoApi(idPedido);
+    } catch (error) {
+      setError(error);
     }
-  }, []);
+  };
 
-  // Agregar pedido a mesa
-  const agregarPedidoAMesa = useCallback(async (idMesa, idProducto) => {
-    setLoading(true);
-    setError(null);
+  const verificarPedidoEnProceso = async (idPedido) => {
     try {
-      await agregarPedidoAMesaApi(idMesa, idProducto);
-      setPedidos({ success: true });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      await verificarPedidoEnProcesoApi(idPedido);
+    } catch (error) {
+      setError(error);
     }
-  }, []);
+  };
 
-  // Agregar pago a pedido
-  const agregarPagoAPedido = useCallback(async (idPedido, idPago) => {
-    setLoading(true);
-    setError(null);
+  const agregarPedidoAMesa = async (idMesa) => {
+    try {
+      const respuesta = await agregarPedidoAMesaApi(idMesa);
+      return respuesta;
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const agregarPagoAPedido = async (idPedido, idPago) => {
     try {
       await agregarPagoAPedidoApi(idPedido, idPago);
-      setPedidos({ success: true });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      setError(error);
     }
-  }, []);
+  };
 
-  // Cerrar pedido
-  const cerrarPedido = useCallback(async (idPedido) => {
-    setLoading(true);
-    setError(null);
+  const cerrarPedido = async (idPedido) => {
     try {
       await cerrarPedidoApi(idPedido);
-      setPedidos({ success: true });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      setError(error);
     }
-  }, []);
+  };
 
-  // Obtener pedidos por pago
-  const obtenerPedidosPorPago = useCallback(async (idPago) => {
-    setLoading(true);
-    setError(null);
+  const obtenerPedidosPorPago = async (idPago) => {
     try {
-      const result = await obtenerPedidosPorPagoApi(idPago);
-      setPedidos(result);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      return await obtenerPedidosPorPagoApi(idPago);
+    } catch (error) {
+      setError(error);
     }
-  }, []);
+  };
 
   return {
     loading,
@@ -104,9 +81,10 @@ export const usePedido = () => {
     pedidos,
     obtenerPedidosPorMesa,
     verificarPedidoEntregado,
+    verificarPedidoEnProceso,
     agregarPedidoAMesa,
     agregarPagoAPedido,
     cerrarPedido,
     obtenerPedidosPorPago,
   };
-};
+}
