@@ -1,66 +1,59 @@
-import { Button, Table } from "react-bootstrap";
+import { Button, Card, Col, Row } from "react-bootstrap";
 import { BsCheck, BsPencil, BsX } from 'react-icons/bs';
 
-export const ListarProductos = ({ producto, actualizarProducto, eliminarProducto }) => {
+export const ListarProductos = ({ productos, actualizarProducto, eliminarProducto }) => {
   return (
-    <Table striped bordered hover>
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Imagen</th>
-          <th>Descripcion</th>
-          <th>Categoria</th>
-          <th>Precio</th>
-          <th>Activo</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {Array.isArray(producto) && producto.length > 0 ? (
-          producto.sort((a, b) => a.id - b.id).map((prod) => (
-            <tr key={prod.id}>
-              <td>
-                {prod.imagen ? (
-                  <img 
-                    src={`${prod.imagen}`} 
-                    alt={prod.nombre} 
-                    style={{ width: '100px', height: 'auto' }} 
-                  />
-                ) : (
-                  <span>No hay imagen</span>
-                )}
-              </td>
-              <td>{prod.nombre}</td>
-              <td>{prod.descripcion}</td>
-              <td>{prod.categoria_data.nombre}</td>
-              <td>{prod.precio}</td>
-              <td>{prod.activo ? <BsCheck color="green" /> : <BsX color="red" />}</td>
-              <Editar 
-                categoria={prod} 
-                actualizarProducto={actualizarProducto} 
-                eliminarProducto={eliminarProducto} 
-              />
-            </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan="7" className="text-center">No hay productos</td>
-          </tr>
-        )}
-      </tbody>
-    </Table>
+    <Row className="g-3 justify-content-center">
+      {Array.isArray(productos) && productos.length > 0 ? (
+        productos.sort((a, b) => a.id - b.id).map((prod) => (
+          <Col xs={12} sm={6} md={4} key={prod.id}>
+            <Card className="h-100">
+              <Card.Body className="text-center">
+                <Card.Img 
+                  variant="top" 
+                  src={prod.imagen ? prod.imagen : "placeholder-image-url"} 
+                  alt={prod.nombre} 
+                  style={{ width: '50%', height: 'auto'}}
+                />
+                <Card.Title>{prod.nombre}</Card.Title>
+                <Card.Text>
+                  <strong>Descripción:</strong> {prod.descripcion}
+                  <br />
+                  <strong>Categoría:</strong> {prod.categoria_data.nombre}
+                  <br />
+                  <strong>Precio:</strong> {prod.precio} €
+                  <br />
+                  <strong>Activo:</strong> {prod.activo ? <BsCheck color="green" /> : <BsX color="red" />}
+                </Card.Text>
+                <Editar 
+                  producto={prod} 
+                  actualizarProducto={actualizarProducto} 
+                  eliminarProducto={eliminarProducto} 
+                />
+              </Card.Body>
+            </Card>
+          </Col>
+        ))
+      ) : (
+        <Col xs={12}>
+          <div className="text-center">
+            <h4>No hay productos disponibles</h4>
+          </div>
+        </Col>
+      )}
+    </Row>
   );
 };
 
-const Editar = ({ categoria, actualizarProducto, eliminarProducto }) => {
+const Editar = ({ producto, actualizarProducto, eliminarProducto }) => {
   return (
-    <td>
-      <Button variant="outline-primary" onClick={() => actualizarProducto(categoria)} className="me-2">
+    <div className="d-flex justify-content-center mt-3">
+      <Button variant="outline-primary" onClick={() => actualizarProducto(producto)} className="me-2">
         <BsPencil />
       </Button>
-      <Button variant="outline-danger" onClick={() => eliminarProducto(categoria)}>
+      <Button variant="outline-danger" onClick={() => eliminarProducto(producto.id)}>
         <BsX />
       </Button>
-    </td>
+    </div>
   );
 };

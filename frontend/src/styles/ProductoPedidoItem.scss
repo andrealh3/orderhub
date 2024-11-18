@@ -1,0 +1,61 @@
+// .producto-pedido-item {
+//     // Ajustamos las tarjetas para que tengan la misma altura en su contenedor
+//     display: flex;
+//     flex-direction: column;
+//     align-items: stretch;
+  
+//     // .card {
+//     //   margin-bottom: 1.5rem; // Margen inferior
+//     //   border: none; // Quita el borde de la tarjeta
+//     //   display: flex;
+//     //   flex-direction: column;
+//     //   height: 100%; // Asegura que se extienda a la altura máxima disponible
+//     // }
+  
+//     // // Fila de la tarjeta, sin espacios entre columnas
+//     // .row {
+//     //   flex: 1;
+//     //   gap: 0;
+//     //   height: 100%;
+//     // }
+  
+//     // Columna de la imagen
+//     .col-img {
+//       display: flex;
+//       align-items: center;
+//       justify-content: center;
+  
+//       img {
+//         max-width: 100%; // Imagen ocupa el 100% del ancho de la columna
+//         max-height: 100%; // Ajusta la altura máxima de la imagen sin forzar altura fija
+//         object-fit: contain; // Mantiene proporciones de la imagen
+//       }
+//     }
+  
+//     // Columna de contenido de texto
+//     .col-text {
+//       display: flex;
+//       flex-direction: column;
+//       justify-content: center;
+//       text-align: center;
+  
+//       .card-body {
+//         flex-grow: 1;
+  
+//         .card-title {
+//           font-weight: bold; // Título en negrita
+//           margin-bottom: 0.5rem; // Espacio debajo del título
+//         }
+  
+//         .card-text {
+//           strong {
+//             font-weight: bold;
+//           }
+  
+//           // Espacio adicional entre líneas de descripción
+//           line-height: 1.5;
+//         }
+//       }
+//     }
+//   }
+  

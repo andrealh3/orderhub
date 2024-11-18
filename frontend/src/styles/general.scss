@@ -1,0 +1,7 @@
+// Sobrescribe variables de Bootstrap antes de importarlo
+$primary: #470DAE;         // Cambia el color principal
+// $secondary: #DAC4E9;       // Cambia el color secundario
+$secondary: #DAD7DF;       // Cambia el color secundario
+
+@import "bootstrap/scss/bootstrap";
+@import "./colores.scss";

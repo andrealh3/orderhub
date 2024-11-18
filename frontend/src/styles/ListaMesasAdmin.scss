@@ -1,0 +1,30 @@
+@import "./colores.scss";
+// Contenedor para los botones y el switch
+/* Contenedor que maneja los botones en la misma línea */
+.d-flex {
+    display: flex;
+    justify-content: flex-start; /* Alinea los elementos al inicio */
+    align-items: center;         /* Centra verticalmente los elementos */
+    margin-bottom: 20px;         /* Espacio debajo de los controles */
+  }
+  
+  .d-flex button {
+    margin-right: 15px;          /* Espacio entre el botón y el switch */
+  }
+  
+  .d-flex .form-check {
+    margin-right: 15px;          /* Espacio entre el switch y el siguiente componente */
+  }
+  
+  /* Botones con margen a la derecha para separación */
+  button {
+    padding: 10px 20px;   /* Botones más grandes para facilidad de uso */
+    border-radius: 8px;    /* Bordes redondeados */
+  }
+  
+  /* Opcional: Estilo extra para el switch */
+  .form-check-input:checked {
+    background-color: #6A1B9A;  /* Cambiar el color cuando está activado */
+    border-color: #6A1B9A;
+  }
+  

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GenericForm } from './GenericForm';
+import { GenericForm } from './FormGeneric/GenericForm';
 import { Link, useNavigate } from 'react-router-dom';
 import { getToken, setToken } from '../utils/constants';
 import { useAuth } from '../hooks/useAuth';
@@ -50,18 +50,18 @@ export const CreateUserForm = () => {
   }
 
   return (
-    <>
-      <h1>Crear usuario</h1>
-      <div>
+    <div className="login-form-container">
+      <div className="login-form-box">
+        <h1>Crear usuario</h1>
         <GenericForm
           campos={campos}
           loading={loading}
           onSubmit={handleSubmit}
           infoBoton={loading ? 'Cargando...' : 'Crear usuario'}
         />
-        <p><Link to="/">Iniciar sesion</Link></p>
+        <Link to="/" className="link">Iniciar sesión</Link>
+        {error && <p style={{ color: 'red' }}>{error}</p>} {/* Muestra mensajes de error */}
       </div>
-      {error && <p style={{ color: 'red' }}>{error}</p>} {/* Muestra mensajes de error */}
-    </>
+    </div>
   );
 };

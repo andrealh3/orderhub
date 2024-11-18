@@ -8,11 +8,13 @@ import { ProductosAdmin } from '../pages/Admin/ProductosAdmin';
 import { UserAdmin } from '../pages/Admin/UserAdmin';
 import { MesasAdmin } from '../pages/Admin/MesasAdmin';
 import { DetallesMesaPedido } from '../components/Admin/Pedidos/DetallesMesaPedido';
+import { MenuPage } from '../components/Admin/SideMenu';
 
 export const AdminRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<PedidosAdmin />} />
+      <Route path="/" element={<MenuPage />} />
+      <Route path="/orders" element={<PedidosAdmin />} />
       <Route path="/users" element={<UserAdmin />} />
       <Route path="/categories" element={<CategoriasAdmin />} />
       <Route path="/products" element={<ProductosAdmin />} />

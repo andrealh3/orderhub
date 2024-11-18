@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { GenericForm } from "../../GenericForm";
-import { actualizarUsuarioApi, agregarUsuarioApi } from "../../../services/UserService";
+import { GenericForm } from "../../FormGeneric/GenericForm";
 import { useAuth } from "../../../hooks/useAuth";
+import { useUsuarios } from "../../../hooks/useUsuarios";
 
-export const AgregarUserLogin = ({ onClose, onRefetch, user }) => {
+export const AgregarUserLogin = ({ onClose, onRefresh, user, nombreValoresFormularios }) => {
   const { auth, actualizarAuth } = useAuth();
   const [error, setError] = useState(''); // Estado para almacenar mensajes de error
   const [loading, setLoading] = useState(false); // Estado que indica si se está cargando
-
+  const { agregarUsuario, actualizarUsuario } = useUsuarios();
+  
   // Definir los campos del formulario, excluyendo 'is_staff' e 'is_superuser' si el usuario actual es superusuario.
   const campos = [
     { name: 'username', label: 'Username', type: 'text' },
@@ -20,37 +21,23 @@ export const AgregarUserLogin = ({ onClose, onRefetch, user }) => {
     ] : []),
   ];
 
-  const handleSubmit = (valores) => {
+  const handleSubmit = async (valores) => {
     setLoading(true); // Indica que el proceso de inicio de sesión está en curso
     setError('');
     valores.role = valores.is_superuser ? 'admin' : 'cliente';
-    if (user) {
-      actualizarUsuarioApi(user.id, valores)
-        .then(() => {
-          if (auth?.me?.id === user.id) {
-            actualizarAuth(valores); // Actualiza el estado de autenticación
-          }
-          onRefetch();
-          onClose();
-        })
-        .catch((error) => {
-          setError(error)
-        })
-        .finally(() => {
-          setLoading(false);
-        })
-    } else {
-      agregarUsuarioApi(valores)
-        .then(() => {
-          onRefetch();
-          onClose();
-        })
-        .catch(error => {
-          setError(error);
-        })
-        .finally(() => {
-          setLoading(false);
-        })
+    try {
+      if (user) {
+        await actualizarUsuario(user.id, valores);
+        if (auth?.me?.id === user.id) {
+          actualizarAuth(valores); // Actualiza el estado de autenticación
+        }
+      } else {
+        await agregarUsuario(valores); // Llama a agregar usuario en el hook
+      }
+      onRefresh();
+      onClose();
+    } catch (error) {
+      setError(error.message || "Error al procesar la solicitud.");
     }
   }
   return (
@@ -62,6 +49,7 @@ export const AgregarUserLogin = ({ onClose, onRefetch, user }) => {
           onSubmit={handleSubmit}
           infoBoton={loading ? 'Cargando...' : (user ? 'Actualizar usuario' : 'Crear usuario')}
           initialValues={initialValues(user)}
+          nombreValoresFormularios={nombreValoresFormularios}
         />
       </div>
       {error && <p style={{ color: 'red' }}>{error.message}</p>} {/* Muestra mensajes de error */}

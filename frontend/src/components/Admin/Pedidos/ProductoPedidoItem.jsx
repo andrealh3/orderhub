@@ -3,19 +3,19 @@ import { Card, Col, Row } from "react-bootstrap"
 export const ProductoPedidoItem = ({ producto }) => {
   return (
     <div>
-      <Card className="mb-4" style={{ height: '100%' }}>
+      <Card className="mb-4 border-0" style={{ height: '100%' }}>
         <Row className="g-0">
-          <Col xs={12} md={4} className="d-flex justify-content-center align-items-center">
+          <Col sm={12} lg={4} className="">
             <Card.Img
               src={producto.producto_data.imagen}
               style={{
                 maxWidth: '100%',
-                maxHeight: '200px',
+                maxHeight: '100%',
                 objectFit: 'contain',
               }}
             />
           </Col>
-          <Col xs={12} md={8} className="align-content-center text-center">
+          <Col sm={12} lg={8} className="align-content-center text-center">
             <Card.Body>
               <Card.Title>{producto.producto_data.nombre}</Card.Title>
               <Card.Text>

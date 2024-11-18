@@ -1,65 +1,55 @@
 import { useEffect, useState } from "react";
 import { HeaderPage } from "../../components/Admin/HeaderPage"
-import { eliminarMesaApi, obtenerMesasApi } from "../../services/MesaService";
 import { ListarMesas } from "../../components/Admin/Mesas/ListarMesas";
 import { Spinner } from "react-bootstrap";
 import { ModalBasic } from "../../components/Common/ModalBasic";
 import { AgregarMesaForm } from "../../components/Admin/Mesas/AgregarMesaForm";
+import { useMesas } from "../../hooks/useMesas";
 
 export const MesasAdmin = () => {
-  const [titleModal, setTitleModal] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [contentModal, setContentModal] = useState(null);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [mesa, setMesa] = useState([]);
-  const [refetch, setRefetch] = useState(false);
-  
+  const [titleModal, setTitleModal] = useState(sessionStorage.getItem('titleModal') || null);
+  const [showModal, setShowModal] = useState(sessionStorage.getItem('showModal') === 'true');
+  const [refresh, setRefresh] = useState(false);
+  const nombreValoresFormularios = "mesaValores";
+  const [mesaValores, setMesaValores] = useState(JSON.parse(sessionStorage.getItem(nombreValoresFormularios)) || null);
+  const { mesas, loading, error, eliminarMesa } = useMesas(refresh);
+
   useEffect(() => {
-    setLoading(true);
-    obtenerMesasApi()
-      .then((mesasObtenida) => {
-        if (Array.isArray(mesasObtenida)) {
-          setMesa(mesasObtenida);
-        } else {
-          setError('Los datos obtenidos no son válidos.');
-        }
-      })
-      .catch((error) => {
-        setError(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [refetch]);
-  
+    if (showModal) {
+      sessionStorage.setItem('titleModal', titleModal);
+      sessionStorage.setItem('showModal', showModal);
+      sessionStorage.setItem(nombreValoresFormularios, JSON.stringify(mesaValores));
+    } else {
+      sessionStorage.removeItem("titleModal");
+      sessionStorage.removeItem("showModal");
+      sessionStorage.removeItem(nombreValoresFormularios);
+      setTitleModal(null);
+      setMesaValores(null);
+    }
+  }, [showModal]);
+
   const openCloseModal = () => setShowModal(prev => !prev);
-  const onRefetch = () => setRefetch(prev => !prev);
+  const onRefresh = () => setRefresh(prev => !prev);
   
+  const getContentModal = () => {
+    if (titleModal === "Nueva mesa") {
+      return <AgregarMesaForm onClose={openCloseModal} onRefresh={onRefresh} mesa={mesaValores} nombreValoresFormularios={nombreValoresFormularios} />;
+    } else if (titleModal === "Actualizar mesa" && mesaValores) {
+      return <AgregarMesaForm onClose={openCloseModal} onRefresh={onRefresh} mesa={mesaValores} nombreValoresFormularios={nombreValoresFormularios} />;
+    }
+    return null;
+  };
+
   const agregarMesa = () => {
     setTitleModal("Nueva mesa");
-    setContentModal(<AgregarMesaForm onClose={openCloseModal} onRefetch={onRefetch} />);
+    setMesaValores(null);
     openCloseModal();
   };
   
   const actualizarMesa = (mesa) => {
     setTitleModal("Actualizar mesa");
-    setContentModal(<AgregarMesaForm onClose={openCloseModal} onRefetch={onRefetch} mesa={mesa} />);
+    setMesaValores(mesa);
     openCloseModal();
-  };
-  
-  const eliminarMesa = (mesa) => {
-    setLoading(true);
-    eliminarMesaApi(mesa.id)
-      .then(() => {
-        onRefetch();
-      })
-      .catch((error) => {
-        setError(error.message || "Error al eliminar la categoría");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
   };
   
   return (
@@ -73,9 +63,9 @@ export const MesasAdmin = () => {
           <p>Cargando...</p>
         </div>
       ) : (
-        <ListarMesas mesa={mesa} actualizarMesa={actualizarMesa} eliminarMesa={eliminarMesa} />
+        <ListarMesas mesas={mesas} actualizarMesa={actualizarMesa} eliminarMesa={eliminarMesa} />
       )}
-      <ModalBasic show={showModal} size="lg" onClose={openCloseModal} title={titleModal} children={contentModal} />
+      <ModalBasic show={showModal} size="lg" onClose={openCloseModal} title={titleModal} children={getContentModal()} />
       {error && <p style={{ color: "red" }}>{error}</p>} {/* Mostrar mensajes de error */}
     </>
   )

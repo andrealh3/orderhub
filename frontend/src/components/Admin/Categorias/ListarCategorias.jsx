@@ -1,60 +1,56 @@
-import { Button, Table } from "react-bootstrap";
+import { Button, Card, Col, Row } from "react-bootstrap";
 import { BsPencil, BsX } from 'react-icons/bs';
 
-export const ListarCategorias = ({ categoria, actualizarCategoria, eliminarCategoria }) => {
+export const ListarCategorias = ({ categorias, actualizarCategoria, eliminarCategoria }) => {
   return (
-    <Table striped bordered hover>
-      <thead>
-        <tr>
-          <th>Imagen</th>
-          <th>Categoria</th>
-          <th>Descripcion</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {Array.isArray(categoria) && categoria.length > 0 ? (
-          categoria.sort((a, b) => a.id - b.id).map((cat) => (
-            <tr key={cat.id}>
-              <td>
-                {cat.imagen ? (
-                  <img 
-                    src={`${cat.imagen}`} 
-                    alt={cat.nombre} 
-                    style={{ width: '100px', height: 'auto' }} 
+    <Row className="g-3 justify-content-center">
+      {Array.isArray(categorias) && categorias.length > 0 ? (
+        categorias.sort((a, b) => a.id - b.id).map((categoria) => (
+          <Col xs={12} sm={6} md={4} key={categoria.id}>
+            <Card className="h-100">
+              <Card.Body className="text-center">
+                {categoria.imagen ? (
+                  <Card.Img 
+                    variant="top" 
+                    src={`${categoria.imagen}`} 
+                    alt={categoria.nombre} 
+                    style={{ width: '50%', height: 'auto' }} 
                   />
                 ) : (
-                  <span>No hay imagen</span>
+                  <Card.Text className="text-muted">No hay imagen</Card.Text>
                 )}
-              </td>
-              <td>{cat.nombre}</td>
-              <td>{cat.descripcion}</td>
-              <Editar 
-                categoria={cat} 
-                actualizarCategoria={actualizarCategoria} 
-                eliminarCategoria={eliminarCategoria} 
-              />
-            </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan="4" className="text-center">No hay categorias</td>
-          </tr>
-        )}
-      </tbody>
-    </Table>
+                <Card.Title>{categoria.nombre}</Card.Title>
+                <Card.Text>{categoria.descripcion}</Card.Text>
+                <Editar 
+                  categoria={categoria} 
+                  actualizarCategoria={actualizarCategoria} 
+                  eliminarCategoria={eliminarCategoria} 
+                />
+              </Card.Body>
+            </Card>
+          </Col>
+        ))
+      ) : (
+        <Col xs={12}>
+          <div className="text-center">
+            <h4>No hay categorías disponibles</h4>
+          </div>
+        </Col>
+      )}
+    </Row>
   );
 };
 
 const Editar = ({ categoria, actualizarCategoria, eliminarCategoria }) => {
   return (
-    <td>
+    <div className="d-flex justify-content-center mt-3">
       <Button variant="outline-primary" onClick={() => actualizarCategoria(categoria)} className="me-2">
         <BsPencil />
       </Button>
-      <Button variant="outline-danger" onClick={() => eliminarCategoria(categoria)}>
+      <Button variant="outline-danger" onClick={() => eliminarCategoria(categoria.id)}>
         <BsX />
       </Button>
-    </td>
+    </div>
   );
 };
+

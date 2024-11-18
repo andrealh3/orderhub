@@ -1,21 +1,30 @@
-import { useState } from "react";
-import { GenericForm } from "../../GenericForm";
-import { actualizarCategoriasApi, agregarCategoriasApi } from "../../../services/CategoriaService";
+import { useEffect, useState } from "react";
+import { GenericForm } from "../../FormGeneric/GenericForm";
+import { useCategorias } from "../../../hooks/useCategorias"; // Asegúrate de que la ruta sea correcta
 
-export const AgregarCategoriaForm = ({ onClose, onRefetch, categoria }) => {
-  const [error, setError] = useState(""); // Estado para manejar mensajes de error
-  const [loading, setLoading] = useState(false); // Estado para manejar el estado de carga
-  const [previewImage, setPreviewImage] = useState(categoria?.imagen || null); // Previsualización de la imagen
+export const AgregarCategoriaForm = ({ onClose, onRefresh, categoria, nombreValoresFormularios }) => {
+  const { agregarCategoria, actualizarCategoria } = useCategorias();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState(categoria?.imagen || null);
   const [imagenFile, setImagenFile] = useState(null);
 
-  // Función para manejar la previsualización de la imagen
+  const obtenerArchivoImagen = async (url) => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const file = new File([blob], decodeURIComponent(url.split('/').pop()), { type: blob.type });
+    return file;
+  };
+
+  // Manejar cambio de imagen
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setPreviewImage(URL.createObjectURL(file)); // Previsualizar imagen seleccionada
+      setPreviewImage(URL.createObjectURL(file));
       setImagenFile(file);
     }
   };
+
 
   // Definición de campos del formulario
   const campos = [
@@ -24,34 +33,43 @@ export const AgregarCategoriaForm = ({ onClose, onRefetch, categoria }) => {
     { name: "descripcion", label: "Descripcion categoría", type: "text" },
   ];
 
-  // Función que se ejecuta al enviar el formulario
-  const handleSubmit = (valores) => {
+  // Manejar envío del formulario
+  const handleSubmit = async (valores) => {
     setLoading(true);
     setError("");
     const formData = new FormData();
     formData.append("nombre", valores.nombre);
     if (imagenFile) {
-      formData.append("imagen", imagenFile); // Usar el archivo almacenado
+      formData.append("imagen", imagenFile);
     }
     formData.append("descripcion", valores.descripcion);
 
-    // Lógica para actualizar o agregar una categoría
-    const action = categoria
-      ? actualizarCategoriasApi(categoria.id, formData) // Actualizar si ya existe
-      : agregarCategoriasApi(formData); // Crear una nueva
-
-    action
-      .then(() => {
-        onRefetch();
-        onClose();
-      })
-      .catch((error) => {
-        setError(error.message || "Error al procesar la solicitud");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      if (categoria) {
+        await actualizarCategoria(categoria.id, formData); // Actualizar si existe
+      } else {
+        await agregarCategoria(formData); // Crear nueva
+      }
+      onRefresh(); // Refrescar la lista
+      onClose(); // Cerrar el formulario
+    } catch (error) {
+      setError(error.message || "Error al procesar la solicitud");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    const cargarImagen = async () => {
+      if (categoria?.imagen) {
+        const file = await obtenerArchivoImagen(categoria.imagen);
+        setImagenFile(file);
+        setPreviewImage(categoria.imagen);
+      }
+    };
+    
+    cargarImagen();
+  }, [categoria]);
 
   return (
     <>
@@ -62,10 +80,14 @@ export const AgregarCategoriaForm = ({ onClose, onRefetch, categoria }) => {
           onSubmit={handleSubmit}
           infoBoton={loading ? "Cargando..." : categoria ? "Actualizar categoría" : "Crear categoría"}
           initialValues={initialValues(categoria)}
+          nombreValoresFormularios={nombreValoresFormularios}
         />
       </div>
       {previewImage && (
         <div>
+          <p>
+            {imagenFile ? `Archivo cargado: ${imagenFile.name}` : "No hay archivo cargado"}
+          </p>
           <img src={previewImage} alt="Previsualización" style={{ maxWidth: "50%", marginTop: "10px" }} />
         </div>
       )}
@@ -74,10 +96,10 @@ export const AgregarCategoriaForm = ({ onClose, onRefetch, categoria }) => {
   );
 };
 
-// Valores iniciales del formulario, para creación o actualización
+// Valores iniciales del formulario
 const initialValues = (categoria) => {
   return {
-    imagen: null,
+    imagen: categoria?.imagen || null,
     nombre: categoria?.nombre || "",
     descripcion: categoria?.descripcion || "",
   };
