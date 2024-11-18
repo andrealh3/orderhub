@@ -3,9 +3,21 @@ from .models import *
 
 
 class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False)
+    
     class Meta:
         model = User
         fields = '__all__'
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)  # Quita el campo de contraseña si no se proporciona
+        instance = super().update(instance, validated_data)
+        
+        if password:
+            instance.set_password(password)  # Establece la nueva contraseña si se proporciona
+            instance.save()
+
+        return instance
 
 class MesaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,8 +42,6 @@ class DetallePedidoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PedidoSerializer(serializers.ModelSerializer):
-    cliente_data = UserSerializer(source='cliente', read_only=True)
-    empleado_data = UserSerializer(source='empleado', read_only=True)
     detalles_pedido_data = DetallePedidoSerializer(source='detalles', many=True, read_only=True)
     mesa_data = MesaSerializer(source='mesa', read_only=True)
     class Meta:

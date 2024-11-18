@@ -11,6 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
+from django.db.models import Case, When, Value, IntegerField
 
 class UserApiViewSet(ModelViewSet):
     """
@@ -100,6 +101,8 @@ class UserApiViewSet(ModelViewSet):
         password = request.data.get('password')
         if password:
             request.data['password'] = make_password(password)
+        else:
+            request.data.pop('password', None)
         return super().partial_update(request, *args, **kwargs)
     
     def update(self, request, *args, **kwargs):
@@ -254,6 +257,25 @@ class CategoriaViewSet(ModelViewSet):
     serializer_class = CategoriaSerializer
     queryset = Categoria.objects.all()
     parser_classes = (MultiPartParser, FormParser)
+    
+    @action(detail=True, methods=['get'])
+    def tiene_productos(self, request, pk=None):
+        """
+        Verifica si hay productos asociados a la categoría especificada.
+
+        Parámetros:
+            id (int): ID de la categoría.
+
+        Respuestas:
+            dict: Información sobre si la categoría tiene productos.
+        """
+        try:
+            categoria = self.get_object()  # Obtiene la categoría usando el pk
+            tiene_productos = categoria.productos.exists()  # Verifica si hay productos
+
+            return Response({'tieneProductos': tiene_productos})
+        except Categoria.DoesNotExist:
+            return Response({'error': 'Categoría no encontrada.'}, status=404)
 
 
 class ProductoViewSet(ModelViewSet):
@@ -387,8 +409,20 @@ class PedidoViewSet(ModelViewSet):
     queryset = Pedido.objects.all()
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['mesa']
-    ordering_fields = '__all__'
-    ordering = ['id']
+    ordering_fields = ['estado_orden', 'fecha', 'hora']
+    ordering = ['estado_orden', 'fecha', 'hora']  # Ordena por defecto por estado_orden y luego por fecha_creacion
+
+    def get_queryset(self):
+        # Anotamos el campo estado_orden para aplicar el orden personalizado
+        return Pedido.objects.annotate(
+            estado_orden=Case(
+                When(estado="PENDIENTE", then=Value(1)),
+                When(estado="EN_PROCESO", then=Value(2)),
+                When(estado="COMPLETADO", then=Value(3)),
+                default=Value(4),  # Cualquier otro estado se ordenará al final
+                output_field=IntegerField(),
+            )
+        )
 
 
 class DetallePedidoViewSet(ModelViewSet):
@@ -518,6 +552,9 @@ class PagoViewSet(ModelViewSet):
     """
     serializer_class = PagoSerializer
     queryset = Pago.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['mesa', 'estado_pago']
+    ordering_fields = '__all__'
 
 
 class FacturaViewSet(ModelViewSet):

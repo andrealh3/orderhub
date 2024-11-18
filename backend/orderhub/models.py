@@ -85,10 +85,14 @@ class Mesa(models.Model):
         numero (IntegerField): Número único de la mesa.
         capacidad (IntegerField): Capacidad de personas que puede albergar la mesa.
         estado (CharField): Estado actual de la mesa (libre, ocupada, reservada).
+        cliente (ForeignKey): Cliente que realizó el pedido.
+        empleado (ForeignKey): Empleado encargado del pedido.
     """
     numero = models.IntegerField(unique=True)
     capacidad = models.IntegerField()
     estado = models.CharField(max_length=20, choices=[('libre', 'Libre'), ('ocupada', 'Ocupada'), ('reservada', 'Reservada')])
+    cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mesa_cliente", blank=True, null=True)
+    empleado = models.ForeignKey(User, on_delete=models.CASCADE, related_name="mesa_empleado", blank=True, null=True)
 
 class Categoria(models.Model):
     """
@@ -138,7 +142,7 @@ class Producto(models.Model):
     imagen = models.ImageField(upload_to='productos', blank=True, null=True)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     activo = models.BooleanField(default=True)
-    categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True)
+    categoria = models.ForeignKey(Categoria, related_name="productos", on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # Verificar si la instancia ya existe para eliminar la imagen anterior
@@ -169,36 +173,19 @@ class Pedido(models.Model):
     Modelo que representa un pedido realizado por un cliente.
 
     Attributes:
-        cliente (ForeignKey): Cliente que realizó el pedido.
-        empleado (ForeignKey): Empleado encargado del pedido.
         mesa (ForeignKey): Mesa asignada al pedido (si aplica).
         fecha (DateField): Fecha en la que se realizó el pedido.
         hora (TimeField): Hora en la que se realizó el pedido.
         estado (CharField): Estado actual del pedido (Pendiente, En proceso, Completado).
         en_linea (BooleanField): Indica si el pedido se realizó en línea.
-        creado_en (DateTimeField): Fecha y hora en que se creó el pedido.
         cerrado (BooleanField): Indica si el pedido está cerrado.
     """
-    cliente = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos_cliente", blank=True, null=True)
-    empleado = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos_empleado", blank=True, null=True)
     mesa = models.ForeignKey(Mesa, on_delete=models.SET_NULL, null=True, blank=True)
-    fecha = models.DateField()
-    hora = models.TimeField()
+    fecha = models.DateField(auto_now_add=True)
+    hora = models.TimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, choices=EstadoPedidoEnum)
     en_linea = models.BooleanField(default=False)
-    creado_en = models.DateTimeField(auto_now_add=True)
     cerrado = models.BooleanField(default=False)
-
-    def save(self, *args, **kwargs):
-        # Verificar si la mesa está ocupada
-        if self.mesa and self.mesa.estado == 'ocupada':
-            # Buscar el último pedido activo de la misma mesa
-            ultimo_pedido = Pedido.objects.filter(mesa=self.mesa, cerrado=False).last()
-            if ultimo_pedido:
-                # Asignar cliente y empleado del último pedido activo al nuevo pedido
-                self.cliente = ultimo_pedido.cliente
-                self.empleado = ultimo_pedido.empleado
-        super().save(*args, **kwargs)
 
 class DetallePedido(models.Model):
     """
@@ -228,13 +215,13 @@ class Pago(models.Model):
     Modelo que representa el pago realizado por un pedido.
 
     Attributes:
-        pedido (ForeignKey): Pedido asociado al pago.
+        mesa (ForeignKey): Mesa asociado al pago.
         total_pago (DecimalField): Monto total pagado.
         tipo_pago (CharField): Método de pago (Tarjeta, Efectivo).
         estado_pago (CharField): Estado del pago (Pendiente, Pagado).
         creado_en (DateTimeField): Fecha y hora en que se registró el pago.
     """
-    pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='pagos')
+    mesa = models.ForeignKey(Mesa, on_delete=models.SET_NULL,  related_name='pago', null=True, blank=True)
     total_pago = models.DecimalField(max_digits=10, decimal_places=2)
     tipo_pago = models.CharField(max_length=20, choices=TipoPagoEnum)
     estado_pago = models.CharField(max_length=20, choices=EstadoPagoEnum)
