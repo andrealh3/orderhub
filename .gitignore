@@ -11,6 +11,7 @@ __pycache__/
 .env
 .vscode/
 .idea/
+backend/media/
 
 # React
 node_modules/
