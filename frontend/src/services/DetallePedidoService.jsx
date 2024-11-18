@@ -1,8 +1,8 @@
 import { BASE_API } from "../utils/constants";
 import { fetchWithToken } from "./fetchWithToken";
 
-export const obtenerProductosApi = async () => {
-  const url = `${BASE_API}/producto/`;
+export const obtenerDetallesPedidoApi = async () => {
+  const url = `${BASE_API}/detalle-pedido/`;
   const parametros = {
     method: "GET",
   };
@@ -15,18 +15,21 @@ export const obtenerProductosApi = async () => {
   }
 };
 
-export const agregarProductosApi = async (datos) => {
-  const url = `${BASE_API}/producto/`;
+export const agregarDetallePedidoApi = async (datos) => {
+  const url = `${BASE_API}/detalle-pedido/`;
   const parametros = {
     method: "POST",
-    body: datos,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(datos),
   };
 
   try {
     const respuesta = await fetchWithToken(url, parametros);
     if (!respuesta.ok) {
       const errorData = await respuesta.json();
-      throw new Error(errorData);
+      throw new Error(errorData.detail || 'Error al crear pedido');
     }
     return await respuesta.json();
   } catch (error) {
@@ -34,8 +37,8 @@ export const agregarProductosApi = async (datos) => {
   }
 };
 
-export const obtenerProductoApi = async (id) => {
-  const url = `${BASE_API}/producto/${id}/`;
+export const obtenerDetallePedidoApi = async (id) => {
+  const url = `${BASE_API}/detalle-pedido/${id}/`;
   const parametros = {
     method: "GET",
   };
@@ -48,11 +51,14 @@ export const obtenerProductoApi = async (id) => {
   }
 };
 
-export const actualizarProductoApi = async (id, datos) => {
-  const url = `${BASE_API}/producto/${id}/`;
+export const actualizarDetallePedidoApi = async (id, datos) => {
+  const url = `${BASE_API}/detalle-pedido/${id}/`;
   const parametros = {
     method: "PATCH",
-    body: datos,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(datos),
   };
 
   try {
@@ -63,8 +69,8 @@ export const actualizarProductoApi = async (id, datos) => {
   }
 };
 
-export const eliminarProductoApi = async (id) => {
-  const url = `${BASE_API}/producto/${id}/`;
+export const eliminarDetallePedidoApi = async (numero) => {
+  const url = `${BASE_API}/detalle-pedido/${numero}/`;
   const parametros = {
     method: "DELETE",
   };
@@ -72,10 +78,10 @@ export const eliminarProductoApi = async (id) => {
   try {
     const respuesta = await fetchWithToken(url, parametros);
     if (respuesta.status === 204) {
-      return {}; // Si es No Content, devuelve un objeto vacío
+      return {}; // No Content
     } else if (!respuesta.ok) {
       const errorData = await respuesta.json();
-      throw new Error(errorData.detail || 'Error al eliminar la categoría');
+      throw new Error(errorData.detail || 'Error al eliminar la pedido');
     }
     return await respuesta.json();
   } catch (error) {

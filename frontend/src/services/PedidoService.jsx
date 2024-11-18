@@ -1,27 +1,25 @@
-import { BASE_API, getToken } from "../utils/constants";
+import { BASE_API, ESTADO_PEDIDO } from "../utils/constants";
 import { fetchWithToken } from "./fetchWithToken";
 
-export const obtenerPedidosPorMesaApi = async (idMesa, estado = "", ordenamiento = "") => {
+export const obtenerPedidosPorMesaApi = async (idMesa, estado = [], ordenamiento = "") => {
   try {
-    const token = getToken();
     const filtroMesa = `mesa=${idMesa}`;
-    const filtroEstado = `estado=${estado}`;
+    const filtroEstado = estado.length ? `estado=${estado.join(",")}` : `estado=`;
     const filtroCerrar = "cerrado=False";
-
-    const url = `${BASE_API}/pedido/?${filtroMesa}&${filtroEstado}&${filtroCerrar}`;
+    const filtroOrdenamiento = ordenamiento ? `ordering=${ordenamiento}` : "";
+    
+    const url = `${BASE_API}/pedido/?${filtroMesa}&${filtroEstado}&${filtroCerrar}&${filtroOrdenamiento}`;
     const parametros = {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
     };
 
     const respuesta = await fetchWithToken(url, parametros);
 
-    // Verifica si la respuesta es ok (código 200-299)
     if (!respuesta.ok) {
-      const errorMsg = await respuesta.text(); // Obtener texto de la respuesta en caso de error
+      const errorMsg = await respuesta.text();
       throw new Error(`Error ${respuesta.status}: ${errorMsg}`);
     }
 
@@ -31,8 +29,7 @@ export const obtenerPedidosPorMesaApi = async (idMesa, estado = "", ordenamiento
     console.error("Error al obtener pedidos por mesa:", error);
     throw error;
   }
-}
-
+};
 
 export const verificarPedidoEntregadoApi = async (id) => {
   try {
@@ -42,12 +39,12 @@ export const verificarPedidoEntregadoApi = async (id) => {
       headers: {
         "Content-Type": "application/json",
       },
-    //   body: JSON.stringify({
-    //     status: ESTADO_PEDIDO.ENTREGADO,
-    //   }),
+      body: JSON.stringify({
+        estado: ESTADO_PEDIDO.COMPLETADO,
+      }),
     };
 
-    const respuesta = await fetch(url, parametros);
+    const respuesta = await fetchWithToken(url, parametros);
     const resultado = await respuesta.json();
     return resultado;
   } catch (error) {
@@ -55,7 +52,28 @@ export const verificarPedidoEntregadoApi = async (id) => {
   }
 }
 
-export const agregarPedidoAMesaApi = async (idMesa, idProducto) => {
+export const verificarPedidoEnProcesoApi = async (id) => {
+  try {
+    const url = `${BASE_API}/pedido/${id}/`;
+    const parametros = {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        estado: ESTADO_PEDIDO.EN_PROCESO,
+      }),
+    };
+
+    const respuesta = await fetchWithToken(url, parametros);
+    const resultado = await respuesta.json();
+    return resultado;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export const agregarPedidoAMesaApi = async (idMesa) => {
   try {
     const url = `${BASE_API}/pedido/`;
     const parametros = {
@@ -64,12 +82,13 @@ export const agregarPedidoAMesaApi = async (idMesa, idProducto) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        status: ESTADO_PEDIDO.PENDIENTE,
-        table: idMesa,
-        product: idProducto,
+        estado: ESTADO_PEDIDO.PENDIENTE,
+        mesa: parseInt(idMesa),
       }),
     };
-    await fetch(url, parametros);
+    const respuesta = await fetchWithToken(url, parametros);
+    const resultado = await respuesta.json();
+    return resultado;
   } catch (error) {
     throw error;
   }

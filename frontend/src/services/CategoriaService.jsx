@@ -1,106 +1,107 @@
-import { BASE_API, getToken} from "../utils/constants";
+import { BASE_API } from "../utils/constants";
 import { fetchWithToken } from "./fetchWithToken";
 
-export const obtenerCategoriasApi = () => {
-  const token = getToken()
+export const obtenerCategoriasApi = async () => {
   const url = `${BASE_API}/categoria/`;
   const parametros = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    method: "GET",
   };
 
-  return fetchWithToken(url, parametros)
-    .then(respuesta => respuesta.json())
-    .catch(error => {
-      throw error;
-    });
-}
+  try {
+    const respuesta = await fetchWithToken(url, parametros);
+    return await respuesta.json();
+  } catch (error) {
+    throw error;
+  }
+};
 
-export const agregarCategoriasApi = (datos) => {
-  const token = getToken()
-
+export const agregarCategoriasApi = async (datos) => {
   const url = `${BASE_API}/categoria/`;
   const parametros = {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: datos,
   };
 
-  return fetchWithToken(url, parametros)
-    .then(respuesta => {
-      if (!respuesta.ok) {
-        return respuesta.json().then(errorData => {
-          throw new Error(errorData.detail || 'Error al crear categoria');
-        });
-      }
-      return respuesta.json();
-    })
-    .catch(error => {
-      throw error;
-    });
+  try {
+    const respuesta = await fetchWithToken(url, parametros);
+    if (!respuesta.ok) {
+      const errorData = await respuesta.json();
+      throw new Error(errorData.detail || 'Error al crear categoria');
+    }
+    return await respuesta.json();
+  } catch (error) {
+    throw error;
+  }
 };
 
-export const obtenerCategoriaApi = (id) => {
-  const token = getToken()
+export const obtenerCategoriaApi = async (id) => {
   const url = `${BASE_API}/categoria/${id}/`;
   const parametros = {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   };
-  
-  return fetchWithToken(url, parametros)
-    .then(respuesta => respuesta.json())
-    .catch(error => {
-      throw error;
-    });
+
+  try {
+    const respuesta = await fetchWithToken(url, parametros);
+    return await respuesta.json();
+  } catch (error) {
+    throw error;
+  }
 };
 
-export const actualizarCategoriasApi = (id, datos) => {
-  const token = getToken()
+export const actualizarCategoriasApi = async (id, datos) => {
   const url = `${BASE_API}/categoria/${id}/`;
   const parametros = {
     method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: datos,
   };
-  
-  return fetchWithToken(url, parametros)
-    .then(respuesta => respuesta.json())
-    .catch(error => {
-      throw error;
-    });
+
+  try {
+    const respuesta = await fetchWithToken(url, parametros);
+    return await respuesta.json();
+  } catch (error) {
+    throw error;
+  }
 };
 
-export const eliminarCategoriaApi = (id) => {
-  const token = getToken();
+export const eliminarCategoriaApi = async (id) => {
   const url = `${BASE_API}/categoria/${id}/`;
   const parametros = {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   };
 
-  return fetchWithToken(url, parametros)
-    .then(respuesta => {
-      // Comprobar si la respuesta tiene contenido
-      if (respuesta.status === 204) {
-        return {}; // Si es No Content, devuelve un objeto vacío
-      } else if (!respuesta.ok) {
-        return respuesta.json().then(errorData => {
-          throw new Error(errorData.detail || 'Error al eliminar la categoría');
-        });
-      }
-      return respuesta.json(); // Si hay contenido, lo parseamos
-    })
-    .catch(error => {
-      throw error;
-    });
+  try {
+    const respuesta = await fetchWithToken(url, parametros);
+    if (respuesta.status === 204) {
+      return {}; // Si es No Content, devuelve un objeto vacío
+    } else if (!respuesta.ok) {
+      const errorData = await respuesta.json();
+      throw new Error(errorData.detail || 'Error al eliminar la categoría');
+    }
+    return await respuesta.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+export const tieneProductosEnCategoriaApi = async (id) => {
+  const url = `${BASE_API}/categoria/${id}/tiene_productos/`;
+  const parametros = {
+    method: "GET",
+  };
+
+  try {
+    const response = await fetchWithToken(url, parametros);
+    
+    // Verificar si la respuesta es correcta
+    if (!response.ok) {
+      throw new Error(`Error al verificar productos en la categoría: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.tieneProductos;
+  } catch (error) {
+    console.error(error);
+    throw new Error('Error al comprobar si la categoría tiene productos.');
+  }
 };

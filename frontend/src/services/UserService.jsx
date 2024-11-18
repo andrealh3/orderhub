@@ -1,23 +1,21 @@
-import { BASE_API, getToken} from "../utils/constants";
+import { BASE_API } from "../utils/constants";
 import { fetchWithToken } from "./fetchWithToken";
 
-export const obtenerUsuariosApi = () => {
-  const token = getToken()
+export const obtenerUsuariosApi = async () => {
   const url = `${BASE_API}/usuario/`;
   const parametros = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    method: "GET",
   };
 
-  return fetchWithToken(url, parametros)
-    .then(respuesta => respuesta.json())
-    .catch(error => {
-      throw error;
-    });
+  try {
+    const respuesta = await fetchWithToken(url, parametros);
+    return await respuesta.json();
+  } catch (error) {
+    throw error;
+  }
 };
 
-export const registrarUsuarioApi = (datos) => {
+export const registrarUsuarioApi = async (datos) => {
   const url = `${BASE_API}/usuario/`;
   const parametros = {
     method: "POST",
@@ -27,91 +25,74 @@ export const registrarUsuarioApi = (datos) => {
     body: JSON.stringify(datos),
   };
 
-  return fetch(url, parametros)
-    .then(respuesta => {
-      if (!respuesta.ok) {
-        return respuesta.json().then(errorData => {
-          throw new Error(errorData.detail || 'Error al crear usuario');
-        });
-      }
-      return respuesta.json();
-    })
-    .catch(error => {
-      throw error;
-    });
+  try {
+    const respuesta = await fetch(url, parametros);
+    if (!respuesta.ok) {
+      const errorData = await respuesta.json();
+      throw new Error(errorData.detail || 'Error al crear usuario');
+    }
+    return await respuesta.json();
+  } catch (error) {
+    throw error;
+  }
 };
 
-export const agregarUsuarioApi = (datos) => {
-  const token = getToken()
-
+export const agregarUsuarioApi = async (datos) => {
   const url = `${BASE_API}/usuario/`;
   const parametros = {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(datos),
   };
 
-  return fetchWithToken(url, parametros)
-    .then(respuesta => {
-      if (!respuesta.ok) {
-        return respuesta.json().then(errorData => {
-          throw new Error(errorData.detail || 'Error al crear categoria');
-        });
-      }
-      return respuesta.json();
-    })
-    .catch(error => {
-      throw error;
-    });
+  try {
+    const respuesta = await fetchWithToken(url, parametros);
+    if (!respuesta.ok) {
+      const errorData = await respuesta.json();
+      throw new Error(errorData.detail || 'Error al crear usuario');
+    }
+    return await respuesta.json();
+  } catch (error) {
+    throw error;
+  }
 };
 
-
-export const actualizarUsuarioApi = (id, datos) => {
-  const token = getToken()
+export const actualizarUsuarioApi = async (id, datos) => {
   const url = `${BASE_API}/usuario/${id}/`;
   const parametros = {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(datos),
   };
-  
-  return fetchWithToken(url, parametros)
-    .then(respuesta => respuesta.json())
-    .catch(error => {
-      throw error;
-    });
+
+  try {
+    const respuesta = await fetchWithToken(url, parametros);
+    return await respuesta.json();
+  } catch (error) {
+    throw error;
+  }
 };
 
-
-export const eliminarUsuarioApi = (id) => {
-  const token = getToken();
+export const eliminarUsuarioApi = async (id) => {
   const url = `${BASE_API}/usuario/${id}/`;
   const parametros = {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   };
 
-  return fetchWithToken(url, parametros)
-    .then(respuesta => {
-      // Comprobar si la respuesta tiene contenido
-      if (respuesta.status === 204) {
-        return {}; // Si es No Content, devuelve un objeto vacío
-      } else if (!respuesta.ok) {
-        return respuesta.json().then(errorData => {
-          throw new Error(errorData.detail || 'Error al eliminar la categoría');
-        });
-      }
-      return respuesta.json(); // Si hay contenido, lo parseamos
-    })
-    .catch(error => {
-      throw error;
-    });
+  try {
+    const respuesta = await fetchWithToken(url, parametros);
+    if (respuesta.status === 204) {
+      return {}; // Si es No Content, devuelve un objeto vacío
+    } else if (!respuesta.ok) {
+      const errorData = await respuesta.json();
+      throw new Error(errorData.detail || 'Error al eliminar el usuario');
+    }
+    return await respuesta.json(); // Si hay contenido, lo parseamos
+  } catch (error) {
+    throw error;
+  }
 };
