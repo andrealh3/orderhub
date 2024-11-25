@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { usePedido } from "../../../hooks/usePedido";
 import { useParams } from "react-router-dom";
-import { Spinner } from "react-bootstrap";
+import { Spinner, Button } from "react-bootstrap";
 import { HeaderPage } from "../HeaderPage";
 import { ListaPedidos } from "./ListaPedidos";
 import { ModalBasic } from "../../Common/ModalBasic";
@@ -9,28 +9,39 @@ import { AgregarPedidoForm } from "./AgregarPedidoForm";
 import { GenericForm } from "../../FormGeneric/GenericForm";
 import { useUsuarios } from "../../../hooks/useUsuarios";
 import { useMesas } from "../../../hooks/useMesas";
+import { ESTADO_PAGO, TIPO_PAGO } from "../../../utils/constants";
+import { usePago } from "../../../hooks/usePago";
 
 export const DetallesMesaPedido = () => {
   const [reloadPedidos, setReloadPedidos] = useState(false);
   const [showPedidoModal, setShowPedidoModal] = useState(false);
   const [showAsignarModal, setShowAsignarModal] = useState(false);
-  const [clienteAsignado, setClienteAsignado] = useState(null); // Guardamos el cliente seleccionado
-  const [empleadoAsignado, setEmpleadoAsignado] = useState(null); // Guardamos el empleado seleccionado
-  const nombreValoresFormularios = "clienteEmpleado"
-  const [formValues, setFormValues] = useState({ cliente: "", empleado: "" }); // Estado para los valores del formulario
+  const [showGenerarCuentaModal, setShowGenerarCuentaModal] = useState(false); // Modal de confirmación cuenta
+  const [showMetodoPagoModal, setShowMetodoPagoModal] = useState(false); // Modal de selección de método de pago
+  const [clienteAsignado, setClienteAsignado] = useState(null);
+  const [empleadoAsignado, setEmpleadoAsignado] = useState(null);
+  const [formValues, setFormValues] = useState({ cliente: "", empleado: "" });
+  const [metodoPagoSeleccionado, setMetodoPagoSeleccionado] = useState(""); // Para almacenar el tipo de pago seleccionado
   const { id } = useParams();
+  const [mesa, setMesa] = useState(null);
   const { loading, pedidos, obtenerPedidosPorMesa } = usePedido();
   const { usuarios } = useUsuarios();
   const { actualizarMesa, obtenerMesa } = useMesas();
+  const { crearPago } = usePago();
 
   const fetchMesaData = async () => {
-    const mesa = await obtenerMesa(id);
-    if (mesa?.cliente && mesa?.empleado) {
-      setClienteAsignado(mesa.cliente);
-      setEmpleadoAsignado(mesa.empleado);
-      await obtenerPedidosPorMesa(id, "", "estado_orden,fecha,-hora");
-    } else {
-      setShowAsignarModal(true);
+    const mesaData = await obtenerMesa(id);  // Obtenemos los datos completos de la mesa
+    if (mesaData) {
+      setMesa(mesaData);  // Guardamos la mesa completa en el estado
+      
+      // Si la mesa tiene cliente y empleado asignados, actualizamos esos valores
+      if (mesaData?.cliente && mesaData?.empleado) {
+        setClienteAsignado(mesaData.cliente);
+        setEmpleadoAsignado(mesaData.empleado);
+        await obtenerPedidosPorMesa(id, "", "estado_orden,fecha,-hora");
+      } else {
+        setShowAsignarModal(true);  // Si no tiene cliente/empleado asignados, mostramos el modal
+      }
     }
   };
 
@@ -43,46 +54,65 @@ export const DetallesMesaPedido = () => {
   const openPedidoModal = () => setShowPedidoModal((prev) => !prev);
   const closePedidoModal = () => setShowPedidoModal(false);
   const closeAsignarModal = () => setShowAsignarModal(false);
+  const closeGenerarCuentaModal = () => setShowGenerarCuentaModal(false);
+  const closeMetodoPagoModal = () => setShowMetodoPagoModal(false);
 
-  // Función para manejar los cambios en el formulario de asignación
-  const handleChange = (name, persona) => {
-    setFormValues((prevValues) => ({ ...prevValues, [name]: persona }));
+  const handleChange = (name, value) => {
+    setFormValues((prevValues) => ({ ...prevValues, [name]: value }));
   };
 
-  // Función que maneja la asignación de cliente y empleado desde el formulario
   const handleAsignarDatos = async () => {
     const { cliente, empleado } = formValues;
+    const newValues = {
+      cliente: formValues.cliente.value,
+      empleado: formValues.empleado.value,
+    };
     if (cliente && empleado) {
       setClienteAsignado(cliente);
       setEmpleadoAsignado(empleado);
       closeAsignarModal();
-      await actualizarMesa(id, formValues);
+      await actualizarMesa(id, newValues);
       onReloadPedidos();
     }
   };
 
-  const onGenerarCuenta = async() => {
-    const resultado = confirm(`¿Estas seguro de generar la cuenta de la mesa?`);
-    if (resultado) {
-      const totalPrecio = pedidos.flatMap(pedido => pedido.detalles_pedido_data)
-                           .reduce((total, { producto_data: { precio } }) => total + Number(precio), 0)
-                           .toString();
-      const metodoPago = {
-        mesa: (await obtenerMesa(id)).id,
-        total_pago: totalPrecio,
-        tipo_pago: "",
-        estado_pago: ""
-      }
-      console.log(metodoPago);
-      console.log(totalPrecio);
-      console.log(pedidos);
-    }
-  }
+  const onGenerarCuenta = () => {
+    setShowGenerarCuentaModal(true);
+  };
 
+  const handleConfirmarGenerarCuenta = async () => {
+    setShowGenerarCuentaModal(false);
+    setShowMetodoPagoModal(true);
+  };
+
+  const handleMetodoPago = async(tipoPago) => {
+    setMetodoPagoSeleccionado(tipoPago);
+    // setShowMetodoPagoModal(false); // Cierra el modal de selección de método de pago
+
+    // Lógica para manejar el pago con el tipo de pago seleccionado
+    const totalPrecio = pedidos.flatMap((pedido) => pedido.detalles_pedido_data)
+      .reduce((total, { producto_data: { precio } }) => total + Number(precio), 0)
+      .toFixed(2);
+
+    const metodoPago = {
+      mesa: mesa.id,
+      total_pago: totalPrecio,
+      tipo_pago: tipoPago,
+      estado_pago: ESTADO_PAGO.PENDIENTE,
+    };
+
+    const pago = await crearPago(metodoPago);
+    console.log(pago)
+    console.log("Método de pago:", metodoPago);
+    console.log("Total precio:", totalPrecio);
+    console.log("Pedidos:", pedidos);
+  };
+
+  const tieneProductos = pedidos?.some(
+    (pedido) => pedido.detalles_pedido_data && pedido.detalles_pedido_data.length > 0
+  );
   return (
     <div>
-      <HeaderPage title={`Mesa ${id}`} btnNuevo="Añadir pedido" btnClickNuevo={openPedidoModal} btnDos="Generar cuenta" btnClickDos={onGenerarCuenta}/>
-
       {loading ? (
         <div className="text-center">
           <Spinner animation="border" role="status">
@@ -91,7 +121,17 @@ export const DetallesMesaPedido = () => {
           <p>Cargando...</p>
         </div>
       ) : (
-        <ListaPedidos pedidos={pedidos} onReloadPedidos={onReloadPedidos} />
+        <div>
+          <HeaderPage 
+            title={`Mesa ${mesa?.numero || ""}`} 
+            btnNuevo="Añadir pedido" 
+            btnClickNuevo={openPedidoModal} 
+            btnDos="Generar cuenta" 
+            btnClickDos={onGenerarCuenta}
+            btnDisabledDos={!tieneProductos}
+          />
+          <ListaPedidos pedidos={pedidos} onReloadPedidos={onReloadPedidos} />
+        </div>
       )}
 
       {/* Modal para asignar cliente y empleado */}
@@ -104,45 +144,36 @@ export const DetallesMesaPedido = () => {
         <GenericForm
           campos={[
             {
-              name: "cliente", 
-              label: "Elige cliente",  
-              searchable: true, 
-              type: "select",
-              placeholder: 'Selecciona cliente',
-              options: usuarios.map(usuario => ({ 
+              name: "cliente",
+              label: "Elige cliente",
+              type: "dropdown",
+              searchable: true,
+              placeholder: "Selecciona cliente",
+              options: usuarios.map((usuario) => ({
                 value: usuario.id,
-                label: usuario.username
+                label: usuario.username,
               })),
-              onChange: (persona) => {
-                const {value} = persona && persona[0];
-                handleChange("cliente", value);
-              }
             },
             {
-              name: "empleado", 
-              label: "Elige empleado",  
-              searchable: true, 
-              type: "select", 
-              placeholder: 'Selecciona empleado',
-              options: usuarios.map(usuario => ({ 
-                value: usuario.id, 
-                label: usuario.username
+              name: "empleado",
+              label: "Elige empleado",
+              type: "dropdown",
+              searchable: true,
+              placeholder: "Selecciona empleado",
+              options: usuarios.map((usuario) => ({
+                value: usuario.id,
+                label: usuario.username,
               })),
-              onChange: (persona) => {
-                const {value} = persona && persona[0];
-                handleChange("empleado", value);
-              }
             },
           ]}
           loading={false}
           onSubmit={handleAsignarDatos}
           infoBoton="Asignar Datos"
-          nombreValoresFormularios={nombreValoresFormularios}
           onChange={handleChange}
         />
       </ModalBasic>
 
-      {/* Modal para generar un nuevo pedido */}
+      {/* Modal para agregar un nuevo pedido */}
       {clienteAsignado && empleadoAsignado && (
         <ModalBasic 
           show={showPedidoModal} 
@@ -153,54 +184,41 @@ export const DetallesMesaPedido = () => {
           <AgregarPedidoForm idMesa={id} openCloseModal={closePedidoModal} onReloadPedidos={onReloadPedidos} />
         </ModalBasic>
       )}
+
+      {/* Modal de confirmación para generar cuenta */}
+      <ModalBasic 
+        show={showGenerarCuentaModal} 
+        size="sm" 
+        onClose={closeGenerarCuentaModal} 
+        title="Confirmar Generación de Cuenta"
+      >
+        <p>¿Estás seguro de generar la cuenta de la mesa?</p>
+        <div className="d-flex justify-content-end gap-2">
+          <Button variant="secondary" onClick={closeGenerarCuentaModal}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={handleConfirmarGenerarCuenta}>
+            Confirmar
+          </Button>
+        </div>
+      </ModalBasic>
+
+      {/* Modal para seleccionar el método de pago */}
+      <ModalBasic 
+        show={showMetodoPagoModal} 
+        size="sm" 
+        onClose={closeMetodoPagoModal} 
+        title="Seleccionar Método de Pago"
+      >
+        <div className="d-flex justify-content-center gap-3">
+          <Button variant="outline-primary" onClick={() => handleMetodoPago(TIPO_PAGO.EFECTIVO)}>
+            Efectivo
+          </Button>
+          <Button variant="outline-primary" onClick={() => handleMetodoPago(TIPO_PAGO.TARJETA)}>
+            Tarjeta
+          </Button>
+        </div>
+      </ModalBasic>
     </div>
   );
 };
-
-
-
-
-// import { useEffect } from "react";
-// import { usePedido } from "../../../hooks/usePedido"
-// import { useParams } from "react-router-dom";
-// import { Spinner } from "react-bootstrap";
-// import { HeaderPage } from "../HeaderPage";
-// import { ListaPedidos } from "./ListaPedidos";
-// import { useState } from "react";
-// import { ModalBasic } from "../../Common/ModalBasic";
-// import { AgregarPedidoForm } from "./AgregarPedidoForm";
-
-// export const DetallesMesaPedido = () => {
-//   const [reloadPedidos, setReloadPedidos] = useState(false)
-//   const { id } = useParams();
-//   const [showModal, setShowModal ] = useState(false);
-
-//   const { loading, pedidos, obtenerPedidosPorMesa} = usePedido();
-
-//   useEffect(() => {
-//     obtenerPedidosPorMesa(id, "", "ordering=-estado,hora");
-//   }, [reloadPedidos]);
-  
-//   const onReloadPedidos = () => setReloadPedidos((prev)=> !prev);
-
-//   const openCloseModal = () => setShowModal((prev) => !prev);
-
-//   return (
-//     <div>
-//       <HeaderPage title={`Mesa ${id}`} btnNuevo="Añadir pedido" btnClickNuevo={openCloseModal} />
-//       {loading ? (
-//         <div className="text-center">
-//           <Spinner animation="border" role="status">
-//             <span className="visually-hidden">Cargando...</span>
-//           </Spinner>
-//           <p>Cargando...</p>
-//         </div>
-//       ): (
-//         <ListaPedidos pedidos={pedidos} onReloadPedidos={onReloadPedidos} />
-//       )}
-//       <ModalBasic show={showModal} size="lg" onClose={openCloseModal} title="Generar pedido">
-//         <AgregarPedidoForm idMesa={id} openCloseModal={openCloseModal} />
-//       </ModalBasic>
-//     </div>
-//   )
-// }
