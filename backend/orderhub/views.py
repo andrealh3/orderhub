@@ -196,7 +196,8 @@ class MesaViewSet(ModelViewSet):
             dict: Confirmación de la eliminación.
     """
     serializer_class = MesaSerializer
-    queryset = Mesa.objects.all().order_by('numero')
+    queryset = Mesa.objects.all()
+    filter_backends = [DjangoFilterBackend]
 
 class CategoriaViewSet(ModelViewSet):
     """
@@ -249,9 +250,6 @@ class CategoriaViewSet(ModelViewSet):
         Elimina una categoría existente.
         
         Parámetros:
-            id (int): ID de la categoría que se desea eliminar.
-        
-        Respuestas:
             dict: Confirmación de la eliminación.
     """
     serializer_class = CategoriaSerializer

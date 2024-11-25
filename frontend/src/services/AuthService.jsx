@@ -12,7 +12,7 @@ export const iniciarSesion = async (valoresFormulario) => {
   };
 
   try {
-    const respuesta = await fetchWithToken(url, parametros);
+    const respuesta = await fetch(url, parametros);
     if (!respuesta.ok) {
       const errorData = await respuesta.json();
       throw new Error(errorData.detail || "Usuario o contraseña incorrectos");
@@ -64,7 +64,7 @@ export const refreshToken = async (refresh) => {
   };
 
   try {
-    const response = await fetchWithToken(url, parametros);
+    const response = await fetch(url, parametros);
     if (!response.ok) {
       if (response.status === 401) {
         throw new Error('No autorizado. Por favor, verifica tus credenciales.');

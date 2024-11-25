@@ -1,22 +1,33 @@
 from django.contrib import admin
 from .models import *
 
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'first_name', 'last_name', 'role', 'is_staff', 'is_active')
-    search_fields = ('email', 'first_name', 'last_name')
-    list_filter = ('is_staff', 'is_active', 'role')
-    ordering = ('email',)
+# Inline para mostrar los detalles del pedido en la administración de Pedido
+class DetallePedidoInline(admin.TabularInline):
+    model = DetallePedido
+    can_delete = False  # Deshabilita la opción de eliminar detalles de pedido desde el inline
+    extra = 0  # No muestra líneas vacías adicionales
+    show_change_link = True  # Muestra un enlace para editar los detalles de pedido
 
-admin.site.register(User, UserAdmin)
+
+# Inline para mostrar los pedidos en la administración de la mesa
+class PedidoInline(admin.TabularInline):
+    model = Pedido
+    extra = 0
+    can_delete = False  # Deshabilita la opción de eliminar pedidos desde el inline
+    show_change_link = True  # Mostrar un enlace para editar los pedidos
 
 class MesaAdmin(admin.ModelAdmin):
     list_display = ('numero', 'capacidad', 'estado')
     search_fields = ('numero',)
     list_filter = ('estado',)
     ordering = ('numero',)
+    
+    # Incluir el inline de pedidos en la vista de la mesa
+    inlines = [PedidoInline]
 
 admin.site.register(Mesa, MesaAdmin)
 
+# Otros modelos y administradores
 class CategoriaAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'descripcion')
     search_fields = ('nombre',)
@@ -36,6 +47,8 @@ class PedidoAdmin(admin.ModelAdmin):
     search_fields = ('mesa', 'estado')
     list_filter = ('estado', 'en_linea')
     ordering = ('-fecha', '-hora')
+    inlines = [DetallePedidoInline]
+
 
 admin.site.register(Pedido, PedidoAdmin)
 
@@ -82,3 +95,4 @@ class EmpleadoTurnoAdmin(admin.ModelAdmin):
     list_filter = ('fecha',)
 
 admin.site.register(EmpleadoTurno, EmpleadoTurnoAdmin)
+

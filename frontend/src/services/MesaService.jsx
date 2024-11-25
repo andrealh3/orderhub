@@ -6,7 +6,7 @@ export const obtenerMesasApi = async () => {
   const parametros = {
     method: "GET",
   };
-
+  
   try {
     const respuesta = await fetchWithToken(url, parametros);
     return await respuesta.json();

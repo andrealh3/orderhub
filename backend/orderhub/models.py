@@ -180,7 +180,7 @@ class Pedido(models.Model):
         en_linea (BooleanField): Indica si el pedido se realizó en línea.
         cerrado (BooleanField): Indica si el pedido está cerrado.
     """
-    mesa = models.ForeignKey(Mesa, on_delete=models.SET_NULL, null=True, blank=True)
+    mesa = models.ForeignKey(Mesa, related_name='pedido', on_delete=models.SET_NULL, null=True, blank=True)
     fecha = models.DateField(auto_now_add=True)
     hora = models.TimeField(auto_now_add=True)
     estado = models.CharField(max_length=20, choices=EstadoPedidoEnum)
@@ -196,7 +196,7 @@ class DetallePedido(models.Model):
         producto (ForeignKey): Producto incluido en el detalle.
         cantidad (IntegerField): Cantidad de producto solicitada.
     """
-    pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='detalles')
+    pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='detalle_pedido')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)
 
@@ -215,13 +215,13 @@ class Pago(models.Model):
     Modelo que representa el pago realizado por un pedido.
 
     Attributes:
-        mesa (ForeignKey): Mesa asociado al pago.
+        mesa (OneToOneField: Mesa asociado al pago.
         total_pago (DecimalField): Monto total pagado.
         tipo_pago (CharField): Método de pago (Tarjeta, Efectivo).
         estado_pago (CharField): Estado del pago (Pendiente, Pagado).
         creado_en (DateTimeField): Fecha y hora en que se registró el pago.
     """
-    mesa = models.ForeignKey(Mesa, on_delete=models.SET_NULL,  related_name='pago', null=True, blank=True)
+    mesa = models.OneToOneField(Mesa, on_delete=models.SET_NULL,  related_name='pago', null=True, blank=True)
     total_pago = models.DecimalField(max_digits=10, decimal_places=2)
     tipo_pago = models.CharField(max_length=20, choices=TipoPagoEnum)
     estado_pago = models.CharField(max_length=20, choices=EstadoPagoEnum)

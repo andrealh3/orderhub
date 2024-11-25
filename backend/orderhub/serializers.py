@@ -19,11 +19,6 @@ class UserSerializer(serializers.ModelSerializer):
 
         return instance
 
-class MesaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Mesa
-        fields = '__all__'
-
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Categoria
@@ -42,10 +37,15 @@ class DetallePedidoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PedidoSerializer(serializers.ModelSerializer):
-    detalles_pedido_data = DetallePedidoSerializer(source='detalles', many=True, read_only=True)
-    mesa_data = MesaSerializer(source='mesa', read_only=True)
+    detalles_pedido_data = DetallePedidoSerializer(source='detalle_pedido', many=True, read_only=True)
     class Meta:
         model = Pedido
+        fields = '__all__'
+
+class MesaSerializer(serializers.ModelSerializer):
+    pedidos_data = PedidoSerializer(source='pedido', many=True, read_only=True)
+    class Meta:
+        model = Mesa
         fields = '__all__'
 
 class PagoSerializer(serializers.ModelSerializer):
