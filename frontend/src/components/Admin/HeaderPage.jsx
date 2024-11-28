@@ -1,6 +1,6 @@
 import { Button } from 'react-bootstrap';
 
-export const HeaderPage = ({ title, btnNuevo, btnClickNuevo, btnDos, btnClickDos }) => {
+export const HeaderPage = ({ title, btnNuevo, btnClickNuevo, btnDos, btnClickDos, btnDisabledDos }) => {
 
   return (
     <div>
@@ -10,7 +10,13 @@ export const HeaderPage = ({ title, btnNuevo, btnClickNuevo, btnDos, btnClickDos
           <Button variant="primary" onClick={ btnClickNuevo }>{ btnNuevo }</Button>
         ) }
         { btnDos && (
-          <Button variant="primary" onClick={ btnClickDos }>{ btnDos }</Button>
+          <Button 
+            variant="primary" 
+            onClick={ btnClickDos } 
+            disabled={ btnDisabledDos } // Deshabilitar el botón si btnDisabledDos es true
+          >
+            { btnDos }
+          </Button>
         ) }
       </div>
     </div>

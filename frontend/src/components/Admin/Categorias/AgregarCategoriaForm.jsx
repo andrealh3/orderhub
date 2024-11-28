@@ -28,7 +28,7 @@ export const AgregarCategoriaForm = ({ onClose, onRefresh, categoria, nombreValo
 
   // Definición de campos del formulario
   const campos = [
-    { name: "imagen", label: "Imagen", type: "file", accept: "image/*", onChange: handleImageChange },
+    { name: "imagen", label: "Imagen", type: "file", accept: "image/*", onchange: handleImageChange },
     { name: "nombre", label: "Nombre categoría", type: "text" },
     { name: "descripcion", label: "Descripcion categoría", type: "text" },
   ];
@@ -61,7 +61,8 @@ export const AgregarCategoriaForm = ({ onClose, onRefresh, categoria, nombreValo
 
   useEffect(() => {
     const cargarImagen = async () => {
-      if (categoria?.imagen) {
+      console.log(JSON.stringify(categoria?.imagen) === '{}')
+      if (categoria?.imagen && JSON.stringify(categoria?.imagen) !== '{}') {
         const file = await obtenerArchivoImagen(categoria.imagen);
         setImagenFile(file);
         setPreviewImage(categoria.imagen);
@@ -88,7 +89,9 @@ export const AgregarCategoriaForm = ({ onClose, onRefresh, categoria, nombreValo
           <p>
             {imagenFile ? `Archivo cargado: ${imagenFile.name}` : "No hay archivo cargado"}
           </p>
-          <img src={previewImage} alt="Previsualización" style={{ maxWidth: "50%", marginTop: "10px" }} />
+          {imagenFile &&
+            <img src={previewImage} alt="Previsualización" style={{ maxWidth: "50%", marginTop: "10px" }} />
+          }
         </div>
       )}
       {error && <p style={{ color: "red" }}>{error}</p>} {/* Mostrar mensaje de error */}
