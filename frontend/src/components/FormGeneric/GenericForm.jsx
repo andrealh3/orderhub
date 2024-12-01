@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Col, Button } from 'react-bootstrap';
 import Select from 'react-select';
 
@@ -12,11 +12,18 @@ export const GenericForm = ({
   onChange,
   disabled
 }) => {
-  const [formValues, setFormValues] = useState(initialValues);
+  const [valoresFormulario, setValoresFormulario] = useState(initialValues);
+
+  useEffect(() => {
+    const { password, ...rest } = valoresFormulario; // Excluyendo el campo de password
+    if (nombreValoresFormularios === "") {
+      sessionStorage.setItem(nombreValoresFormularios, JSON.stringify(rest));
+    } // Guardar en sessionStorage
+  }, [valoresFormulario]);
 
   // Manejar cambios en los campos
   const handleInputChange = (name, value) => {
-    setFormValues((prev) => ({
+    setValoresFormulario((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -27,7 +34,7 @@ export const GenericForm = ({
 
   // Renderizar un campo según su tipo
   const renderField = (campo) => {
-    const { name, label, type, options, searchable, placeholder, accept } = campo;
+    const { name, label, type, options, searchable, placeholder, accept, onchange } = campo;
 
     switch (type) {
       case 'text':
@@ -37,7 +44,7 @@ export const GenericForm = ({
       case 'number':
         return renderNumberField(name, label);
       case 'file':
-        return renderFileField(name, label, accept);
+        return renderFileField(name, label, accept, onchange);
       case 'checkbox':
         return renderCheckboxField(name, label);
       case 'select':
@@ -55,7 +62,7 @@ export const GenericForm = ({
       <Form.Label>{label}</Form.Label>
       <Form.Control
         type={type}
-        value={formValues[name] || ''}
+        value={valoresFormulario[name] || ''}
         onChange={(e) => handleInputChange(name, e.target.value)}
         placeholder={label}
       />
@@ -68,7 +75,7 @@ export const GenericForm = ({
       <Form.Label>{label}</Form.Label>
       <Form.Control
         type="number"
-        value={formValues[name] || ''}
+        value={valoresFormulario[name] || ''}
         onChange={(e) => handleInputChange(name, e.target.value)}
         placeholder={label}
       />
@@ -76,13 +83,16 @@ export const GenericForm = ({
   );
 
   // Renderizar campo de archivo
-  const renderFileField = (name, label, accept) => (
+  const renderFileField = (name, label, accept, onchange) => (
     <Form.Group as={Col} controlId={name} key={name}>
       <Form.Label>{label}</Form.Label>
       <Form.Control
         type="file"
         accept={accept}
-        onChange={(e) => handleInputChange(name, e.target.files[0])}
+        onChange={(e) => {
+          handleInputChange(name, e.target.files[0])
+          if (onchange) onchange(e)
+        }}
       />
     </Form.Group>
   );
@@ -93,7 +103,7 @@ export const GenericForm = ({
       <Form.Check
         type="checkbox"
         label={label}
-        checked={formValues[name] || false}
+        checked={valoresFormulario[name] || false}
         onChange={(e) => handleInputChange(name, e.target.checked)}
       />
     </Form.Group>
@@ -105,7 +115,7 @@ export const GenericForm = ({
       <Form.Label>{label}</Form.Label>
       <Form.Control
         as="select"
-        value={formValues[name] || ''}
+        value={valoresFormulario[name] || ''}
         onChange={(e) => handleInputChange(name, e.target.value)}
       >
         <option value="">Selecciona una opción</option>
@@ -124,7 +134,7 @@ export const GenericForm = ({
       <Form.Label>{label}</Form.Label>
       {searchable ? (
         <Select
-          value={formValues[name] || ''}
+          value={valoresFormulario[name] || ''}
           onChange={(selectedOption) => {
             // Si se deselecciona, restablecer el valor a null o vacío
             handleInputChange(name, selectedOption);
@@ -139,7 +149,7 @@ export const GenericForm = ({
         />
       ) : (
         <Select
-          value={formValues[name] || ''}
+          value={valoresFormulario[name] || ''}
           onChange={(selectedOption) => handleInputChange(name, selectedOption)}
           options={options}
           placeholder={placeholder}
@@ -153,17 +163,19 @@ export const GenericForm = ({
   // Enviar el formulario
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formValues);
+    onSubmit(valoresFormulario);
   };
 
   return (
     <Form onSubmit={handleSubmit}>
       {campos.map((campo) => renderField(campo))}
-      {campos.renderExtraAction && (
-        <div className="extra-actions">
-          {renderExtraAction()}
+      {campos
+      .filter(campo => campo.renderExtraAction)  // Filtramos los campos que tienen `renderExtraAction`
+      .map((campo, index) => (
+        <div key={index} className="extra-actions">
+          {campo.renderExtraAction()}  {/* Llamamos a la función `renderExtraAction` */}
         </div>
-      )}
+      ))}
       <Button variant="primary" type="submit" disabled={disabled}>
         {infoBoton}
       </Button>

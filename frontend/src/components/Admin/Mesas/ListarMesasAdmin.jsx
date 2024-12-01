@@ -1,17 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ListarMesaAdmin } from "./ListarMesaAdmin";
 import { Row, Col, Button, Form, Modal } from 'react-bootstrap';
-import { LuRefreshCw } from "react-icons/lu";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useMesas } from "../../../hooks/useMesas";
 import "../../../styles/ListaMesasAdmin.scss";
 
 export const ListarMesasAdmin = ({ mesas }) => {
-  const [reload, setReload] = useState(false);
-  const [autoReload, setAutoReload] = useState(() => {
-    const savedAutoReload = sessionStorage.getItem("autoReload");
-    return savedAutoReload ? JSON.parse(savedAutoReload) : false;
-  });
   const [showModal, setShowModal] = useState(false);
   const [selectedMesa, setSelectedMesa] = useState(null);
   const [isOccupied, setIsOccupied] = useState(false);
@@ -19,26 +13,6 @@ export const ListarMesasAdmin = ({ mesas }) => {
   const { actualizarMesa } = useMesas();
   
   const navigate = useNavigate();
-
-  const onReload = () => setReload(prev => !prev);
-
-  useEffect(() => {
-    let intervalId;
-
-    if (autoReload) {
-      intervalId = setInterval(onReload, 5000);
-    }
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [autoReload]);
-
-  const onChangeAutoReload = (e) => {
-    const isChecked = e.target.checked;
-    setAutoReload(isChecked);
-    sessionStorage.setItem("autoReload", JSON.stringify(isChecked));
-  };
 
   const handleShowModal = (mesa) => {
     if (mesa.estado !== 'ocupada') { 
@@ -67,21 +41,6 @@ export const ListarMesasAdmin = ({ mesas }) => {
 
   return (
     <div className="listar-mesas-container">
-      {/* Contenedor flex para los botones en la misma línea */}
-      <div className="d-flex justify-content-end align-items-center mb-3">
-        <Form.Check 
-          type="switch"
-          id="reload-automatico" 
-          label="Reload automático" 
-          checked={autoReload} 
-          onChange={onChangeAutoReload} 
-          className="me-3"
-        />
-        <Button onClick={onReload} className="me-3">
-          <LuRefreshCw />
-        </Button>
-      </div>
-
       <Row className="justify-content-center">
         {mesas.map((mesa) => (
           <Col key={mesa.id} xs={12} sm={6} md={4}>
@@ -90,7 +49,7 @@ export const ListarMesasAdmin = ({ mesas }) => {
               onClick={() => handleShowModal(mesa)} 
               className={`mesa-button ${mesa.estado === 'ocupada' ? 'ocupada' : 'libre'}`}
             >
-              <ListarMesaAdmin key={mesa.id} mesa={mesa} reload={reload} />
+              <ListarMesaAdmin key={mesa.id} mesa={mesa} />
             </Button>
           </Col>
         ))}

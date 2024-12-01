@@ -1,6 +1,8 @@
 services:
   backend:
     depends_on:
+      redis:
+        condition: service_healthy
       db:
         condition: service_healthy
     build:
@@ -23,7 +25,8 @@ services:
       DJANGO_ENV: desarrollo
       SECRET_KEY: ${KEY_SECRET}
       API: ${VITE_API_URL}
-    
+      REDIS_HOST: redis
+  
   frontend:
     depends_on:
       db:
@@ -61,8 +64,25 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
+  redis:
+    container_name: ${APP_NAME}_redis
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   db_data:
+  redis_data:
   
 networks:
   network:

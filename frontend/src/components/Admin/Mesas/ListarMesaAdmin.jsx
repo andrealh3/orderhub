@@ -1,35 +1,37 @@
-import { Badge, Card } from 'react-bootstrap';
+import { useState, useEffect } from "react";
+import { Badge, Card } from "react-bootstrap";
 import { IcTable } from "../../Iconos/IcTable";
-import { useEffect, useState } from 'react';
-import { ESTADO_PEDIDO } from '../../../utils/constants';
-import { usePedido } from '../../../hooks/usePedido';
+import { useLocation } from "react-router-dom";
 
-export const ListarMesaAdmin = ({ mesa, reload }) => {
-  const { loading, error, pedidos = [], obtenerPedidosPorMesa } = usePedido(); // Valor predeterminado como []
-  const [pedidosFiltrados, setPedidosFiltrados] = useState([]);
+export const ListarMesaAdmin = ({ mesa }) => {
+  const [pedidos, setPedidos] = useState(mesa.pedidos_data);
+  const [error, setError] = useState(null);
+  const location = useLocation(); // Obtener la ubicación actual
 
   useEffect(() => {
-    const obtenerPedidosPendientesOEnProceso = async () => {
-      await obtenerPedidosPorMesa(mesa.id, [ESTADO_PEDIDO.PENDIENTE, ESTADO_PEDIDO.EN_PROCESO]);
+    const socket = new WebSocket(`ws://localhost:8000/ws/pedidos/${mesa.id}/`);
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === "pedidos_update") {
+        setPedidos(data.pedidos);
+      }
     };
-    
-    obtenerPedidosPendientesOEnProceso();
-  }, [mesa.id, reload]);
 
-  useEffect(() => {
-    if (pedidos && Array.isArray(pedidos)) {
-      const filtrados = pedidos.filter(
-        (pedido) => pedido.estado === ESTADO_PEDIDO.PENDIENTE || pedido.estado === ESTADO_PEDIDO.EN_PROCESO
-      );
-      setPedidosFiltrados(filtrados);
-    }
-  }, [pedidos]);
+    socket.onerror = () => {
+      setError("Hubo un problema con la conexión WebSocket."); // Maneja el error
+    };
+
+    return () => {
+      socket.close(); // Cierra la conexión al cambiar la ubicación
+    };
+  }, [mesa.id, location.pathname]);
 
   return (
     <Card className="mb-3 align-items-center justify-content-center position-relative" style={{ width: '18rem', border: 'none' }}>
       <Card.Body className="text-center">
         {error && <p>Error: {error}</p>}
-        {pedidosFiltrados.length > 0 && !loading && (
+        {pedidos.length > 0 && (
           <Badge
             pill
             bg="warning"
@@ -37,7 +39,7 @@ export const ListarMesaAdmin = ({ mesa, reload }) => {
             className="position-absolute top-0 start-50 translate-middle-x"
             style={{ transform: 'translateY(-50%)' }}
           >
-            {pedidosFiltrados.length}
+            {pedidos.length}
           </Badge>
         )}
         <IcTable width="100" height="100" />

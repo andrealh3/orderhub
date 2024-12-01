@@ -4,3 +4,5 @@ from django.apps import AppConfig
 class OrderhubConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'orderhub'
+    def ready(self):
+        import orderhub.signals

@@ -11,3 +11,6 @@ python-decouple==3.8  # Para gestionar variables de entorno
 drf-yasg==1.21.7
 pytz==2024.2
 whitenoise==6.7.0
+channels
+channels-redis
+uvicorn

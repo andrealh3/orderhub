@@ -199,6 +199,21 @@ class MesaViewSet(ModelViewSet):
     queryset = Mesa.objects.all()
     filter_backends = [DjangoFilterBackend]
 
+#     # views.py
+# from channels.layers import get_channel_layer
+# from asgiref.sync import async_to_sync
+
+# def enviar_actualizacion_pedidos(mesa_id, mensaje):
+#     channel_layer = get_channel_layer()
+#     async_to_sync(channel_layer.group_send)(
+#         f"mesa_{mesa_id}",
+#         {
+#             "type": "pedidos_actualizados",
+#             "message": mensaje
+#         }
+#     )
+
+
 class CategoriaViewSet(ModelViewSet):
     """
     Detalles de la API para las categorías.

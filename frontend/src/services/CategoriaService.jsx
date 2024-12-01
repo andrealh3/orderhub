@@ -30,7 +30,7 @@ export const agregarCategoriasApi = async (datos) => {
     }
     return await respuesta.json();
   } catch (error) {
-    throw error;
+    throw new Error("Error al agregar la categoría. Intenta nuevamente.");
   }
 };
 

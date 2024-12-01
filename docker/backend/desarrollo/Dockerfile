@@ -13,4 +13,4 @@ ENV DJANGO_ENV=desarrollo
 
 EXPOSE 8000
 
-ENTRYPOINT ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+ENTRYPOINT ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "backend.asgi:application", "--bind", "0.0.0.0:8000"]

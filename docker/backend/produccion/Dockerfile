@@ -14,4 +14,4 @@ FROM builder AS final
 
 EXPOSE 8000
 
-ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8000", "backend.wsgi:application"]
+ENTRYPOINT ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "backend.asgi:application", "--bind", "0.0.0.0:8000"]
