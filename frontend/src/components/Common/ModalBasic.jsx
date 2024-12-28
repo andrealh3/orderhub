@@ -3,7 +3,7 @@ import { Modal, Button } from 'react-bootstrap';
 
 export const ModalBasic = ({ show = false, size = "sm", title = "", children, onClose }) => {
   return (
-    <Modal show={show} size={size}>
+    <Modal show={show} size={size} centered>
       {title && (
         <Modal.Header>
           <Modal.Title>{title}</Modal.Title>

@@ -152,7 +152,7 @@ export const GenericForm = ({
           value={valoresFormulario[name] || ''}
           onChange={(selectedOption) => handleInputChange(name, selectedOption)}
           options={options}
-          placeholder={placeholder}
+          // placeholder={placeholder}
           isSearchable={false}
           isClearable
         />

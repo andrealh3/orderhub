@@ -187,6 +187,11 @@ class Pedido(models.Model):
     en_linea = models.BooleanField(default=False)
     cerrado = models.BooleanField(default=False)
 
+EstadoDetallePedido = (
+    ("NO_ENTREGADO", "No_entregado"),
+    ("ENTREGADO", "Entregado"),
+)
+
 class DetallePedido(models.Model):
     """
     Modelo que representa el detalle de los productos solicitados en un pedido.
@@ -199,6 +204,7 @@ class DetallePedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name='detalle_pedido')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField(default=1)
+    estado = models.CharField(max_length=20, choices=EstadoDetallePedido, null=True, blank=True)
 
 EstadoPagoEnum = (
     ("PENDIENTE", "Pendiente"),
@@ -221,7 +227,21 @@ class Pago(models.Model):
         estado_pago (CharField): Estado del pago (Pendiente, Pagado).
         creado_en (DateTimeField): Fecha y hora en que se registró el pago.
     """
-    mesa = models.OneToOneField(Mesa, on_delete=models.SET_NULL,  related_name='pago', null=True, blank=True)
+    pedido = models.ForeignKey(
+        Pedido,  # Nombre del modelo al que se referencia
+        on_delete=models.CASCADE,  # Si se elimina un pedido, se eliminan los pagos asociados
+        related_name='pagos',  # Permite acceder a los pagos desde el pedido
+        null=False,  # Un pago siempre debe estar asociado a un pedido
+        blank=False,
+        default=1
+    )
+    mesa = models.ForeignKey(
+        Mesa,
+        on_delete=models.SET_NULL,
+        related_name='pagos_mesa',  # Nombre único para la relación de mesa
+        null=True,
+        blank=True
+    )
     total_pago = models.DecimalField(max_digits=10, decimal_places=2)
     tipo_pago = models.CharField(max_length=20, choices=TipoPagoEnum)
     estado_pago = models.CharField(max_length=20, choices=EstadoPagoEnum)

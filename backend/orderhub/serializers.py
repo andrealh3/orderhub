@@ -49,6 +49,7 @@ class MesaSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class PagoSerializer(serializers.ModelSerializer):
+    mesa_data = MesaSerializer(source='mesa', allow_null=True, many=True, read_only=True)
     class Meta:
         model = Pago
         fields = '__all__'

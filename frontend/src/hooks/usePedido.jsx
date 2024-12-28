@@ -1,24 +1,25 @@
 import { useState } from "react";
 import {
-  obtenerPedidosPorMesaApi,
   verificarPedidoEntregadoApi,
   agregarPedidoAMesaApi,
   agregarPagoAPedidoApi,
   cerrarPedidoApi,
   obtenerPedidosPorPagoApi,
   verificarPedidoEnProcesoApi,
+  obtenerPedidoAbiertoApi,
+  obtenerPedidoPorMesaApi,
 } from "../services/PedidoService";
 
 export const usePedido = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [pedidos, setPedidos] = useState(null);
+  const [pedido, setPedido] = useState(null);
 
-  const obtenerPedidosPorMesa = async (idMesa, estado = [], ordenamiento = "") => {
+  const obtenerPedidoPorMesa = async (idMesa, ordenamiento = "") => {
     try {
       setLoading(true);
-      const respuesta = await obtenerPedidosPorMesaApi(idMesa, estado, ordenamiento);
-      setPedidos(respuesta);
+      const respuesta = await obtenerPedidoPorMesaApi(idMesa, ordenamiento);
+      setPedido(respuesta);
     } catch (error) {
       setError(error.message);
     } finally{
@@ -26,6 +27,14 @@ export const usePedido = () => {
     }
   };
   
+  const obtenerPedidoAbierto = async (idMesa) => {
+    try {
+      return await obtenerPedidoAbiertoApi(idMesa);
+    } catch (error) {
+      setError(error);
+    }
+  };
+
   const verificarPedidoEntregado = async (idPedido) => {
     try {
       await verificarPedidoEntregadoApi(idPedido);
@@ -78,13 +87,14 @@ export const usePedido = () => {
   return {
     loading,
     error,
-    pedidos,
-    obtenerPedidosPorMesa,
+    pedido,
+    obtenerPedidoPorMesa,
     verificarPedidoEntregado,
     verificarPedidoEnProceso,
     agregarPedidoAMesa,
     agregarPagoAPedido,
     cerrarPedido,
     obtenerPedidosPorPago,
+    obtenerPedidoAbierto,
   };
 }

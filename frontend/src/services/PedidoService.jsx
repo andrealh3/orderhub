@@ -1,14 +1,12 @@
 import { BASE_API, ESTADO_PEDIDO } from "../utils/constants";
 import { fetchWithToken } from "./fetchWithToken";
 
-export const obtenerPedidosPorMesaApi = async (idMesa, estado = [], ordenamiento = "") => {
+export const obtenerPedidoPorMesaApi = async (idMesa, ordenamiento = "") => {
   try {
     const filtroMesa = `mesa=${idMesa}`;
-    const filtroEstado = estado.length ? `estado=${estado.join(",")}` : `estado=`;
     const filtroCerrar = "cerrado=False";
     const filtroOrdenamiento = ordenamiento ? `ordering=${ordenamiento}` : "";
-    
-    const url = `${BASE_API}/pedido/?${filtroMesa}&${filtroEstado}&${filtroCerrar}&${filtroOrdenamiento}`;
+    const url = `${BASE_API}/pedido/?${filtroMesa}&${filtroCerrar}&${filtroOrdenamiento}`;
     const parametros = {
       method: "GET",
       headers: {
@@ -51,6 +49,16 @@ export const verificarPedidoEntregadoApi = async (id) => {
     throw error;
   }
 }
+
+export const obtenerPedidoAbiertoApi = async (idMesa) => {
+  try {
+    const response = await fetchWithToken(`${BASE_API}/pedido/?mesa=${idMesa}&cerrado=false`);
+    const data = await response.json();
+    return data.length > 0 ? data[0] : null;  // Devuelve el primer pedido encontrado o null si no hay
+  } catch (error) {
+    return null;
+  }
+};
 
 export const verificarPedidoEnProcesoApi = async (id) => {
   try {
@@ -103,7 +111,7 @@ export const agregarPagoAPedidoApi = async (idPedido, idPago) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        payment: idPago,
+        pago: idPago,
       }),
     };
     await fetch(url, parametros);
@@ -121,10 +129,11 @@ export const cerrarPedidoApi = async (idPedido) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        close: true,
+        cerrado: true,
+        estado: ESTADO_PEDIDO.COMPLETADO,
       }),
     };
-    await fetch(url, parametros);
+    await fetchWithToken(url, parametros);
   } catch (error) {
     throw error;
   }

@@ -35,10 +35,15 @@ class MesaPedidosConsumer(AsyncWebsocketConsumer):
         """
         pedidos = event['pedidos']
 
+        pedidos_filtrados = [
+            pedido for pedido in pedidos
+            if not pedido['cerrado'] and pedido['estado'] in ['PENDIENTE', 'EN_PROCESO']
+        ]
+
         # Envía los pedidos actualizados al cliente
         await self.send(text_data=json.dumps({
             'type': 'pedidos_update',
-            'pedidos': pedidos
+            'pedidos': pedidos_filtrados
         }))
 
 

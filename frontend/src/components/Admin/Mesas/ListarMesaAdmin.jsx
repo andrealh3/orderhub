@@ -4,7 +4,7 @@ import { IcTable } from "../../Iconos/IcTable";
 import { useLocation } from "react-router-dom";
 
 export const ListarMesaAdmin = ({ mesa }) => {
-  const [pedidos, setPedidos] = useState(mesa.pedidos_data);
+  const [pedidos, setPedidos] = useState(mesa.pedidos_data.filter(pedido => !pedido.cerrado && pedido.estado === 'COMPLETADO'));
   const [error, setError] = useState(null);
   const location = useLocation(); // Obtener la ubicación actual
 

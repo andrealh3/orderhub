@@ -28,3 +28,8 @@ export const ESTADO_PAGO = {
   PENDIENTE: "PENDIENTE",
   PAGADO: "PAGADO",
 }
+
+export const TIPO_PAGO = {
+  EFECTIVO: "EFECTIVO",
+  TARJETA: "TARJETA"
+}

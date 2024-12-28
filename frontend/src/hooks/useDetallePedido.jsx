@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { actualizarDetallePedidoApi, agregarDetallePedidoApi, eliminarDetallePedidoApi, obtenerDetallePedidoApi, obtenerDetallesPedidoApi } from "../services/DetallePedidoService";
+import { actualizarDetallePedidoApi, agregarDetallePedidoApi, eliminarDetallePedidoApi, obtenerDetallePedidoPorProductoApi, obtenerDetallePedidoApi, obtenerDetallesPedidoApi } from "../services/DetallePedidoService";
 
 
 export const useDetallePedido = (refresh) => {
@@ -13,6 +13,19 @@ export const useDetallePedido = (refresh) => {
     try {
       const data = await obtenerDetallesPedidoApi();
       setDetallesPedidos(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const obtenerDetallePedidoPorProducto = async (id) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await obtenerDetallePedidoPorProductoApi(id);
+      return data;
     } catch (err) {
       setError(err.message);
     } finally {
@@ -83,6 +96,7 @@ export const useDetallePedido = (refresh) => {
     loading,
     error,
     obtenerDetallesPedidos,
+    obtenerDetallePedidoPorProducto,
     obtenerDetallePedido,
     agregarDetallePedido,
     actualizarDetallePedido,

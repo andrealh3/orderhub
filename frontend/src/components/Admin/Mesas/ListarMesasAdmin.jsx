@@ -42,7 +42,9 @@ export const ListarMesasAdmin = ({ mesas }) => {
   return (
     <div className="listar-mesas-container">
       <Row className="justify-content-center">
-        {mesas.map((mesa) => (
+        {mesas
+          .sort((a, b) => a.numero - b.numero)
+          .map((mesa) => (
           <Col key={mesa.id} xs={12} sm={6} md={4}>
             <Button 
               variant="link" 

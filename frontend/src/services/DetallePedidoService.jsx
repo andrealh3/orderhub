@@ -51,7 +51,18 @@ export const obtenerDetallePedidoApi = async (id) => {
   }
 };
 
+export const obtenerDetallePedidoPorProductoApi = async (idPedido, idProducto) => {
+  try {
+    const response = await fetchWithToken(`${BASE_API}/detalle-pedido/?pedido=${idPedido}&producto=${idProducto}`);
+    const data = await response.json();
+    return data.length > 0 ? data[0] : null;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const actualizarDetallePedidoApi = async (id, datos) => {
+  console.log(datos)
   const url = `${BASE_API}/detalle-pedido/${id}/`;
   const parametros = {
     method: "PATCH",
