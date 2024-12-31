@@ -46,18 +46,6 @@ export const ListarUsers = ({users, actualizarUsuario, eliminarUsuario, currentU
 const Editar = ({user, actualizarUsuario, eliminarUsuario, currentUserId }) => {
   return (
     <td>
-<<<<<<< HEAD:frontend/src/components/Admin/TableUsers.jsx
-      <>
-        <Button variant="outline-primary" onClick={() => actualizarUsuario(user)} className="me-2"> {/* Espaciado con 'me-2' */}
-          <BsPencil /> 
-        </Button>
-        {user.id !== currentUserId && (
-          <Button variant="outline-danger" onClick={() => eliminarUsuario(user)} >
-            <BsX />
-          </Button>
-        )}
-      </>
-=======
       {user.id !== currentUserId && (
         <>
           <Button variant="outline-primary" onClick={() => actualizarUsuario(user)} className="me-2"> {/* Espaciado con 'me-2' */}
@@ -68,7 +56,6 @@ const Editar = ({user, actualizarUsuario, eliminarUsuario, currentUserId }) => {
           </Button>
         </>
       )}
->>>>>>> d400243 (Modificación de archivos, variables y carpetas):frontend/src/components/Admin/Users/ListarUsers.jsx
     </td>  
   )
 }
